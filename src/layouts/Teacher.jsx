@@ -1,14 +1,13 @@
+import React from 'react';
 import NavigationBar from '../components/NavigationBar';
 import routeName from '../config/routename';
 
-const HomePage = () => {
-
+const Teacher = () => {
   return (
     <>
-      <NavigationBar activeKey={routeName.home}/>
+      <NavigationBar activeKey={routeName.teacher}/>
     </>
   );
-
 };
 
-export default HomePage;
+export default Teacher;
