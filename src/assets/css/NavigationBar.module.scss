@@ -3,6 +3,10 @@
   height: 60px;
   padding: 0 16px;
   border-bottom: 1px solid #dee2e6;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #ffffff;
 }
 
 .main-navbar{
@@ -48,9 +52,11 @@
   cursor: pointer;
 }
 
-.nav-link.active{
+.active{
   border-bottom: 3px solid #0f6cbf;
 }
+
+
 
 
 

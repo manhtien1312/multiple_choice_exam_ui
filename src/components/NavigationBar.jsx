@@ -1,25 +1,32 @@
 /* eslint-disable react/prop-types */
-import React, { useState } from 'react';
+import React from 'react';
 import { Container, Navbar, Nav } from 'react-bootstrap';
 import routeName from '../config/routename';
-import '../assets/css/NavigationBar.css';
+import classNames from 'classnames/bind';
+import styles from '../assets/css/NavigationBar.module.scss';
 
-const NavigationBar = ({ activeKey }) => {
+const cn = classNames.bind(styles);
+
+const NavigationBar = (prop) => {
 
   return (
     <>
-      <Navbar className='navbar bg-body-tertiary' expand="lg">
-        <Container className='main-navbar'>
-          <Navbar.Brand className='app-name' href={routeName.home}>Trắc nghiệm trực tuyến</Navbar.Brand>
-          <Navbar.Collapse className='collapse' id="basic-navbar-nav">
-            <Nav className='nav'
-              activeKey={activeKey}
+      <Navbar className={cn('navbar')} expand="lg">
+        <Container className={cn('main-navbar')}>
+          <Navbar.Brand className={cn('app-name')}
+                        href={routeName.home}>
+            Trắc nghiệm trực tuyến
+          </Navbar.Brand>
+          <Navbar.Collapse className={cn('collapse')}
+                           id="basic-navbar-nav">
+            <Nav className={cn('nav')}
+              activeKey={prop.activeKey}
             >
-              <Nav.Link className='nav-link' href={routeName.home}>Trang chủ</Nav.Link>
-              <Nav.Link className='nav-link' href={routeName.class}>Lớp học</Nav.Link>
-              <Nav.Link className='nav-link' href={routeName.teacher}>Giáo viên</Nav.Link>
-              <Nav.Link className='nav-link' href={routeName.student}>Sinh viên</Nav.Link>
-              <Nav.Link className='nav-link' href={routeName.subject}>Môn học</Nav.Link>
+              <Nav.Link className={cn('nav-link', { active: prop.activeKey === routeName.home })} href={routeName.home}>Trang chủ</Nav.Link>
+              <Nav.Link className={cn('nav-link', { active: prop.activeKey === routeName.class})} href={routeName.class}>Lớp học</Nav.Link>
+              <Nav.Link className={cn('nav-link', { active: prop.activeKey === routeName.teacher })} href={routeName.teacher}>Giáo viên</Nav.Link>
+              <Nav.Link className={cn('nav-link', { active: prop.activeKey === routeName.student })} href={routeName.student}>Sinh viên</Nav.Link>
+              <Nav.Link className={cn('nav-link', { active: prop.activeKey === routeName.subject })} href={routeName.subject}>Môn học</Nav.Link>
             </Nav>
           </Navbar.Collapse>
 
