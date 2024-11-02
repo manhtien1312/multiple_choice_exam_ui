@@ -7,57 +7,116 @@
   top: 0;
   left: 0;
   background-color: #ffffff;
-}
-
-.main-navbar{
-  width: fit-content;
-  height: 100%;
   display: flex;
+  justify-content: space-between;
+  z-index: 1000;
+
+  .main-navbar{
+    width: fit-content;
+    height: 100%;
+    display: flex;
+
+    .app-name{
+      width: fit-content;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: rgba(0, 0, 0, 0.9);
+      font-size: 18.75px;
+      font-weight: 400;
+      letter-spacing: 0.3px;
+      margin-right: 24px;
+      cursor: pointer;
+    }
+
+    .collapse{
+      height: 100%;
+
+      .nav{
+        height: 100%;
+        display: flex;
+
+        .nav-link{
+          height: 100%;
+          display: flex;
+          align-items: center;
+          padding: 0 16px;
+          text-decoration: none;
+          color: rgba(0, 0, 0, 0.9);
+          font-size: 15px;
+          font-weight: 400;
+          letter-spacing: 0.3px;
+          margin-right: 8px;
+
+          &:hover{
+            cursor: pointer;
+            background-color: #f8f9fa;
+          }
+        }
+
+        .active{
+          border-bottom: 3px solid #0f6cbf;
+        }
+      }
+    }
+  }
+
+  .actions {
+    width: fit-content;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    border: none;
+    background-color: transparent;
+    position: relative;
+
+    .user-name{
+      font-size: 15px;
+    }
+
+    .avatar-image{
+      width: 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 0 15px;
+
+      &:hover{
+        cursor: pointer;
+      }
+
+      .image{
+        width: 35px;
+        height: 35px;
+      }
+    }
+
+    .dropdown {
+      min-width: 150px;
+      height: fit-content;
+      padding: 10px 0;
+      border: 1px solid rgb(0 0 0 / .15);
+      border-radius: .5rem;
+      position: absolute;
+      top: 100%;
+      right: 0;
+
+      .dropdown-item{
+        padding: .25rem 1.75rem .25rem .75rem;
+        font-size: .9375rem;
+        font-weight: 400;
+        color: #1d2125;
+        text-align: inherit;
+        background-color: #fff0;
+
+        &:hover{
+          cursor: pointer;
+          outline: 0;
+          background-color: #0f6cbf;
+          color: #fff;
+        }
+      }
+    }
+  }
 }
-
-.app-name{
-  width: fit-content;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  color: rgba(0, 0, 0, 0.9);
-  font-size: 18.75px;
-  font-weight: 400;
-  letter-spacing: 0.3px;
-  margin-right: 24px;
-  cursor: pointer;
-}
-
-.collapse{
-  height: 100%;
-}
-
-.nav{
-  height: 100%;
-  display: flex;
-}
-
-.nav-link{
-  height: 100%;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  text-decoration: none;
-  color: rgba(0, 0, 0, 0.9);
-  font-size: 15px;
-  font-weight: 400;
-  letter-spacing: 0.3px;
-  margin-right: 8px;
-  cursor: pointer;
-}
-
-.active{
-  border-bottom: 3px solid #0f6cbf;
-}
-
-
-
-
-
-

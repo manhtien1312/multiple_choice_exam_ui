@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from "react-router-dom";
-import routename from "../config/routename.js";
+import routeName from '../config/routename.js';
 import axios from "axios";
 import styles from '../assets/css/Login.module.scss';
 import classNames from "classnames/bind";
@@ -25,14 +25,25 @@ const LoginPage = () => {
             const loginResponse = res.data;
             localStorage.setItem("role", loginResponse.role);
             localStorage.setItem("token", loginResponse.token);
-            navigate(routename.home)
+            localStorage.setItem("userFullName", loginResponse.userFullName);
+            if(loginResponse.role === "ROLE_ADMIN"){
+                navigate(routeName.teacher);
+            }
+            else {
+                navigate(routeName.class);
+            }
         } catch (error){
             if(error.response.status === 400){
                 setIsVisible(true);
             }
         }
 
+    }
 
+    const handleKeyDown = (e) => {
+        if(e.key === "Enter"){
+            sendLoginRequest();
+        }
     }
 
     return (
@@ -58,7 +69,9 @@ const LoginPage = () => {
                     name='password'
                     type='password'
                     placeholder='Mật khẩu'
-                    onChange={(e) => {setPassword(e.target.value)}}/>
+                    onChange={(e) => {setPassword(e.target.value)}}
+                    onKeyDown={(e) => {handleKeyDown(e)}}
+                />
                 <div className={cn('forgot')}>
                     <a href="/forgot" className={cn('btn-forgot')}>Quên mật khẩu?</a>
                 </div>
