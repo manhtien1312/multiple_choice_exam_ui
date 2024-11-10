@@ -6,6 +6,7 @@ import ClassDetail from "../layouts/ClassDetail";
 import Teacher from "../layouts/Teacher";
 import Student from "../layouts/Student";
 import Subject from "../layouts/Subject";
+import SubjectDetail from "../layouts/SubjectDetail";
 
 const routes = [
   { path: routeName.login, component: LoginPage },
@@ -15,6 +16,7 @@ const routes = [
   { path: routeName.teacher, component: Teacher },
   { path: routeName.student, component: Student },
   { path: routeName.subject, component: Subject },
+  { path: routeName.subjectDetail, component: SubjectDetail },
 ]
 
 export { routes }

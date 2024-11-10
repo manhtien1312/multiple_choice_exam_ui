@@ -1,0 +1,225 @@
+.question-item-container{
+    width: 1000px;
+    height: fit-content;
+    background-color: #f2f2f2;
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+    margin-top: 25px;
+    padding: 10px;
+
+    .head{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .question-action{
+
+            button{
+                padding: 3px 10px;
+                margin-left: 5px;
+
+                &:hover{
+                    cursor: pointer;
+                }
+
+                i{
+                    margin-right: 5px;
+                }
+            }
+        }
+    }
+
+    .question-content{
+        margin: 15px 0;
+    }
+
+    .answers{
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 10px;
+        row-gap: 10px;
+
+        .answer-content{
+            display: flex;
+
+            i{
+                margin-right: 5px;
+            }
+        }
+    }
+}
+
+.question-form{
+    width: 1100px;
+    height: fit-content;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: .5rem;
+    box-shadow: 0 .5rem 1rem rgb(0 0 0 / .15);
+    display: flex;
+    flex-direction: column;
+
+    .question-form-header{
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+
+        .question-type{
+            width: fit-content;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+    
+            p{
+                margin-right: 15px;
+                padding: 5px;
+                border: .5px solid #8d8d8d;
+            }
+        }
+
+        .form-action{
+            display: flex;  
+            align-items: center;
+
+            .btn-close{
+                font-size: 1.5rem;
+                color: #b85b05;
+                padding: 0 5px;
+                margin-left: 10px;
+                background-color: #fff;
+                border: .5px solid #8d8d8d;
+    
+                &:hover{
+                    cursor: pointer;
+                    background-color: #e6e6e6;
+                  }
+            }
+
+            .btn-save{
+                padding: 6px;
+                font-size: 16px;
+                border: none;
+                color: #fff;
+                background-color: #0f6cbf;
+        
+                &:hover{
+                    cursor: pointer;
+                    background-color: #0c589c;
+                }
+            }
+        }
+    }
+
+    .question-content{
+        height: 200px;
+        font-size: 20px;
+        padding: 10px;
+        text-align: center;    
+        border: .5px solid #8d8d8d;
+    }
+
+    .answers{
+        margin-top: 15px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        row-gap: 15px;
+        column-gap: 15px;
+
+        .answer{
+            height: 100px;
+            display: flex;
+            border: .5px solid #8d8d8d;
+
+            .check-correct{
+                width: 20px;
+                margin-left: 10px;
+            }
+
+            .answer-content{
+                width: 100%;
+                font-size: 20px;
+                padding: 10px;
+                text-align: center;
+                border: none;
+
+                &:focus{
+                    border: none;
+                    outline: none;
+                }
+            }
+        }
+    }
+
+    .explanation{
+        height: 100px;
+        font-size: 20px;
+        padding: 10px;
+        margin-top: 15px;
+        text-align: center;    
+        border: .5px solid #8d8d8d;
+    }
+}
+
+.delete-question-form{
+    width: 400px;
+    height: fit-content;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: .5rem;
+    box-shadow: 0 .5rem 1rem rgb(0 0 0 / .15);
+    display: flex;
+    flex-direction: column;
+  
+    .form-header{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 8px;
+  
+      .title-delete-question{
+        font-size: 1.25rem;
+        font-weight: 400;
+        color: #b85b05;
+      }
+  
+      i{
+        font-size: 1.5rem;
+        color: #b85b05;
+  
+        &:hover{
+          cursor: pointer;
+        }
+      }
+    }
+  
+    .action-btn{
+      margin-top: 14px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+  
+      button{
+        width: 100%;
+        padding: .5rem 1rem;
+        font-size: 1.171875rem;
+        line-height: 1.5;
+        border: none;
+        border-radius: .6rem;
+        color: #fff;
+        background-color: #0f6cbf;
+  
+        &:hover{
+          cursor: pointer;
+          background-color: #0c589c;
+        }
+      }
+
+      .btn-delete{
+        background-color: #bf0f0f;
+
+        &:hover{
+            background-color: #720707;
+        }
+      }
+    }
+  }

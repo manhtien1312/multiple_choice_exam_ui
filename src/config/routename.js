@@ -6,6 +6,7 @@ const routeName = {
   teacher: '/teacher',
   student: '/student',
   subject: '/subject',
+  subjectDetail: '/subject/:subjectId',
 }
 
 export default routeName

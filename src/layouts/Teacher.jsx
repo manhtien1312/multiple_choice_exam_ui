@@ -1,7 +1,6 @@
 import {useEffect, useState} from 'react';
 import NavigationBar from '../components/NavigationBar';
 import routeName from '../config/routename';
-import userImage from '../assets/images/user.png';
 import classNames from "classnames/bind";
 import styles from '../assets/css/Teacher.module.scss';
 import axios from "axios";

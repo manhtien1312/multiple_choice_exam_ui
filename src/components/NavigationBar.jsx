@@ -41,7 +41,10 @@ const NavigationBar = (prop) => {
                 role === "ROLE_ADMIN" &&
                   <Nav.Link className={cn('nav-link', { active: prop.activeKey === routeName.teacher })} href={routeName.teacher}>Giáo viên</Nav.Link>
               }
-              <Nav.Link className={cn('nav-link', { active: prop.activeKey === routeName.class})} href={routeName.class}>Lớp học</Nav.Link>
+              {
+                (role === "ROLE_STUDENT" || role === "ROLE_TEACHER") &&
+                  <Nav.Link className={cn('nav-link', { active: prop.activeKey === routeName.class})} href={routeName.class}>Lớp học</Nav.Link>
+              }
               {
                 role === "ROLE_ADMIN" &&
                   <Nav.Link className={cn('nav-link', { active: prop.activeKey === routeName.student })} href={routeName.student}>Sinh viên</Nav.Link>

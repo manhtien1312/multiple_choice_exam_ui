@@ -61,6 +61,9 @@ const Class = () => {
 
     useEffect(() => {
         getClasses();
+        if(message !== ""){
+            alert(message);
+        }
     }, [message])
 
     return (
