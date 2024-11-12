@@ -66,7 +66,7 @@ const QuestionItem = (prop) => {
         <>
             <div className={cn("question-item-container")}>
                 <div className={cn('head')}>
-                    <p>Câu {question.questionCode.substr(2, 3)}</p>
+                    <p>Câu {question.questionCode.substr(2, question.questionCode.length-2)}</p>
                     <div className={cn('question-action')}>
                         <button
                             onClick={() => {setModifyPopup(true)}}
@@ -106,7 +106,7 @@ const QuestionItem = (prop) => {
                         <div className={cn('question-form-header')}>
                             <div className={cn('question-type')}>
                                 <p>{question.type.typeName}</p>
-                                <p>Câu {question.questionCode.substr(2, 3)}</p>
+                                <p>Câu {question.questionCode.substr(2, question.questionCode.length-2)}</p>
                             </div>
                             <div className={cn('form-action')}>
                                 <button 

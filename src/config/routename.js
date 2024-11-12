@@ -7,6 +7,7 @@ const routeName = {
   student: '/student',
   subject: '/subject',
   subjectDetail: '/subject/:subjectId',
+  examQuestionDetail: '/exam-question/:examQuestionId',
 }
 
 export default routeName

@@ -3,6 +3,7 @@ import classNames from 'classnames/bind';
 import styles from '../assets/css/QuestionBankTable.module.scss';
 import axios from 'axios';
 import QuestionItem from './QuestionItem';
+import Popup from './Popup';
 
 const cn = classNames.bind(styles);
 
@@ -22,8 +23,62 @@ const QuestionBankTable = (prop) => {
     )
     
     const [questionBankType, setQuestionBankType] = useState(1);
+    const [questionBankId, setQuestionBankId] = useState('');
     const [questionBank, setQuestionBank] = useState([]);
+    const [listQuestionType, setListQuestionType] = useState([]);
+    const [focused, setFocused] = useState(false);
+    const [popup, setPopup] = useState(false);
     const [message, setMessage] = useState("");
+    const [newQuestion, setNewQuestion] = useState({
+        type: {
+            typeName: "",
+        },
+        questionCode: "",
+        questionContent: "",
+        answers: [
+            {
+                answerContent: "",
+                isCorrect: false
+            },
+            {
+                answerContent: "",
+                isCorrect: false
+            },
+            {
+                answerContent: "",
+                isCorrect: false
+            },
+            {
+                answerContent: "",
+                isCorrect: false
+            },
+        ],
+        explanation: "",
+    });
+
+    const getQuestionBank = async () => {
+        try {
+            const res = await axios.get("http://localhost:8080/api/v1/question-bank", {
+                params: {
+                    subjectId: prop.subjectId,
+                    type: questionBankType,
+                },
+            });
+            setQuestionBankId(res.data.id);
+            setQuestionBank(res.data.questions)
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const getQuestionType = async () => {
+        const res = await axios.get("http://localhost:8080/api/v1/question-type", {
+            params: {
+                subjectId: prop.subjectId
+            }
+        });
+        setListQuestionType(res.data);
+    }
 
     const handleExportQuestionBank = async () => {
         const res = await axios.get("http://localhost:8080/api/v1/question-bank/export-excel", {
@@ -67,21 +122,40 @@ const QuestionBankTable = (prop) => {
         }
     }
 
-    useEffect(() => {
-        const getQuestionBank = async () => {
-            try {
-                const res = await axios.get("http://localhost:8080/api/v1/question-bank", {
-                    params: {
-                        subjectId: prop.subjectId,
-                        type: questionBankType,
-                    },
-                });
-                setQuestionBank(res.data.questions)
-            } catch (error) {
-                console.log(error);
-            }
-        }
+    const openAddQuestionForm = () => {
+        getQuestionType();
+        setPopup(true);
+    }
 
+    const handleChangeContent = (index, e) => {
+        const updatedAnswers = [...newQuestion.answers];
+        updatedAnswers[index].answerContent = e.target.value;
+        setNewQuestion({ ...newQuestion, answers: updatedAnswers })
+    }
+
+    const handleChangeCorrect = (index) => {
+        const updatedAnswers = newQuestion.answers.map((answer, idx) => ({
+            ...answer,
+            isCorrect: idx === index
+        }));
+        setNewQuestion({ ...newQuestion, answers: updatedAnswers })
+    }
+
+    const handleAddQuestion = async () => {
+        const res = await axios.post("http://localhost:8080/api/v1/question", newQuestion, {
+            params: {
+                questionBankId: questionBankId
+            }
+        })
+        setMessage(res.data.message);
+        closePopup();
+    }
+
+    const closePopup = () => {
+        setPopup(false);
+    }
+
+    useEffect(() => {
         getQuestionBank();
         if(message !== ""){
             alert(message);
@@ -127,6 +201,7 @@ const QuestionBankTable = (prop) => {
                     </button>
                     <button
                         className={cn('btn-add-question')}
+                        onClick={() => openAddQuestionForm()}
                     >Thêm câu hỏi
                     </button>
                     <input
@@ -143,7 +218,121 @@ const QuestionBankTable = (prop) => {
                         <QuestionItem key={question.id} question={question} />
                     ))
                 }
-            </div>                                              
+            </div>
+
+            {
+                popup &&
+                <Popup onClick={() => closePopup()}>
+                    <div className={cn('question-form')}>
+                        <div className={cn('question-form-header')}>
+                            <div className={cn('question-type')}>
+                                <input
+                                    className={cn('input-question-type')}
+                                    type='text'
+                                    placeholder="Loại câu hỏi"
+                                    onFocus={() => setFocused(true)}
+                                    onBlur={() => setFocused(false)}
+                                    value={newQuestion.type.typeName}
+                                    onChange={(e) => {
+                                        setNewQuestion({ ...newQuestion, 
+                                            type: {
+                                                typeName: e.target.value
+                                            }
+                                         })
+                                    }}
+                                />
+                                <input
+                                    type='text'
+                                    placeholder='Mã câu hỏi'
+                                    value={newQuestion.questionCode}
+                                    onChange={(e) => {
+                                        setNewQuestion({ ...newQuestion,
+                                            questionCode: e.target.value
+                                         })
+                                    }}
+                                />
+                                {
+                                    focused &&
+                                    <div className={cn('list-type')}>
+                                        {
+                                            listQuestionType.map((questionType) => (
+                                                <div 
+                                                    key={questionType.id}
+                                                    onMouseDown={() => {
+                                                        setNewQuestion({ ...newQuestion,
+                                                            type: {
+                                                                typeName: questionType.typeName
+                                                            }
+                                                         })
+                                                    }}
+                                                >
+                                                    {questionType.typeName}
+                                                </div>
+                                            ))
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <div className={cn('form-action')}>
+                                <button 
+                                    className={cn('btn-save')}
+                                    onClick={() => {handleAddQuestion()}}
+                                >
+                                    Lưu câu hỏi
+                                </button>
+                                <button className={cn('btn-close')}>
+                                    <i className="fa-solid fa-xmark" onClick={() => closePopup()}></i>
+                                </button>
+                            </div>
+                            
+                        </div>
+
+                        <textarea 
+                            className={cn('question-content')} 
+                            placeholder="Nhập nội dung câu hỏi"
+                            value={newQuestion.questionContent}
+                            onChange={(e) => {
+                                setNewQuestion({ ...newQuestion,
+                                    questionContent: e.target.value
+                                 })
+                            }}
+                        />
+
+                        <div className={cn('answers')}>
+                            {
+                                newQuestion.answers.map((answer, index) => (
+                                    <div key={index} className={cn('answer')}>
+                                        <input 
+                                            type='radio' 
+                                            className={cn('check-correct')} 
+                                            checked={answer.isCorrect}
+                                            onChange={() => {handleChangeCorrect(index)}}
+                                        />
+                                        <textarea 
+                                            className={cn('answer-content')}
+                                            value={answer.answerContent}
+                                            placeholder={`Đáp án ${index+1}`}
+                                            onChange={(e) => {handleChangeContent(index, e)}}
+                                        />
+                                    </div>
+                                ))
+                            }
+                        </div>
+
+                        <textarea 
+                            className={cn('explanation')}
+                            placeholder='Thêm giải thích'
+                            value={newQuestion.explanation}
+                            onChange={(e) => {
+                                setNewQuestion({ ...newQuestion,
+                                    explanation: e.target.value
+                                 })
+                            }}
+                        />
+
+                    </div>
+                </Popup>
+            }                                              
         </>
     );
 };

@@ -7,6 +7,7 @@ import { Container, Nav, Navbar } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import QuestionBankTable from "../components/QuestionBankTable";
+import ExamQuestionBankTable from "../components/ExamQuestionBankTable";
 
 const cn = classNames.bind(styles);
 
@@ -120,7 +121,7 @@ const SubjectDetail = () => {
                     {
                         activeComponent === 'ExamQuestionBank' &&
                         <div className={cn('exam-question-bank')}>
-                            ngan hang de
+                            <ExamQuestionBankTable subjectId={subjectId} />
                         </div>
                     }
 
