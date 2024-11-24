@@ -103,14 +103,9 @@ const ExamQuestionDetail = () => {
 
                                             <div className={cn('answers')}>
                                                 {
-                                                    question.answers.map((answer) => (
+                                                    question.answers.map((answer, index) => (
                                                         <div key={answer.id} className={cn('answer-content')}>
-                                                            { 
-                                                                answer.isCorrect 
-                                                                ? <i className="fa-solid fa-check" style={{color: "#63E6BE"}}></i>
-                                                                : <i className="fa-solid fa-xmark" style={{color: "#f50505"}}></i>
-                                                            }
-                                                            <p>{answer.answerContent}</p>
+                                                            <p>{index+1}. {answer.answerContent}</p>
                                                         </div>
                                                     ))
                                                 }
@@ -155,14 +150,9 @@ const ExamQuestionDetail = () => {
 
                                             <div className={cn('answers')}>
                                                 {
-                                                    question.answers.map((answer) => (
+                                                    question.answers.map((answer, index) => (
                                                         <div key={answer.id} className={cn('answer-content')}>
-                                                            { 
-                                                                answer.isCorrect 
-                                                                ? <i className="fa-solid fa-check" style={{color: "#63E6BE"}}></i>
-                                                                : <i className="fa-solid fa-xmark" style={{color: "#f50505"}}></i>
-                                                            }
-                                                            <p>{answer.answerContent}</p>
+                                                            <p>{index+1}. {answer.answerContent}</p>
                                                         </div>
                                                     ))
                                                 }

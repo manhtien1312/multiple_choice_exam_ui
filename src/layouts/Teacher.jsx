@@ -122,13 +122,21 @@ const Teacher = () => {
                         </div>
                     </div>
 
-                    <div className={cn('list')}>
-                        {
-                            teachers.map((teacher, index) => (
-                                <TeacherItem teacher={teacher} key={index} />
-                            ))
-                        }
-                    </div>
+                    {
+                        teachers.length === 0 ? (
+                            <div className={cn("no-teacher-notification")}>
+                                <p>Chưa có giáo viên trong hệ thống</p>
+                            </div>
+                        ) : (
+                            <div className={cn('list')}>
+                                {
+                                    teachers.map((teacher, index) => (
+                                        <TeacherItem teacher={teacher} key={index} />
+                                    ))
+                                }
+                            </div>
+                        )
+                    }
                 </div>
             </div>
 

@@ -25,6 +25,8 @@ const Subject = () => {
         }
     );
 
+    const role = localStorage.getItem("role");
+
 	const [subjects, setSubjects] = useState([]);
 	const [popup, setPopup] = useState(false);
 	const [newSubject, setNewSubject] = useState({});
@@ -99,11 +101,14 @@ const Subject = () => {
                                         </select>
                                     </div>
 
-                                    <button
-                                        className={cn('btn-add-class')}
-                                        onClick={() => setPopup(true)}
-                                    >Thêm môn học
-                                    </button>
+                                    {
+                                        role === "ROLE_ADMIN" &&
+                                        <button
+                                            className={cn('btn-add-class')}
+                                            onClick={() => setPopup(true)}
+                                        >Thêm môn học
+                                        </button>
+                                    }
                                 </div>
 
                                 <div className={cn('list')}>

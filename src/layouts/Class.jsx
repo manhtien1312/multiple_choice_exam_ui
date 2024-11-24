@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useState, useRef} from 'react';
 import NavigationBar from '../components/NavigationBar';
 import Popup from "../components/Popup.jsx";
 import routeName from '../config/routename';
@@ -26,16 +26,35 @@ const Class = () => {
         }
     )
 
+    const role = localStorage.getItem("role");
+
+    const elementRef = useRef(null);
+
     const [classes, setClasses] = useState([]);
     const [subjects, setSubjects] = useState([]);
-    const [newClass, setNewClass] = useState({});
+    const [teachers, setTeachers] = useState([]);
+    const [newClass, setNewClass] = useState({ teacherName: "" });
+
     const [popup, setPopup] = useState(false);
     const [message, setMessage] = useState('');
-
-    const sortConditionArr = ["className", "subject"];
+    const [focused, setFocused] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
 
     const getClasses = async () => {
-        const res = await axios.get("http://localhost:8080/api/v1/class/teacher-class");
+        let res = {};
+        switch (role) {
+            case "ROLE_ADMIN":
+                res = await axios.get("http://localhost:8080/api/v1/class");
+                break;
+            case "ROLE_TEACHER":
+                res = await axios.get("http://localhost:8080/api/v1/class/teacher-class");
+                break;
+            case "ROLE_STUDENT":
+                res = await axios.get("http://localhost:8080/api/v1/class/student-class");
+                break;
+            default:
+                break;
+        }
         setClasses(res.data);
     }
 
@@ -44,8 +63,14 @@ const Class = () => {
         setSubjects(res.data);
     }
 
+    const getTeacher = async () => {
+        const res = await axios.get("http://localhost:8080/api/v1/teacher");
+        setTeachers(res.data);
+    }
+
     const openAddClassForm = () => {
         getSubjects();
+        getTeacher();
         setPopup(true);
     }
 
@@ -58,6 +83,26 @@ const Class = () => {
         setMessage(res.data.message);
         setPopup(false);
     }
+
+    const toggleVisibility = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsVisible(!isVisible);
+    };
+
+    const handleClickOutside = (e) => {
+        if (elementRef.current && !elementRef.current.contains(e.target)) {
+            setIsVisible(false);
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     useEffect(() => {
         getClasses();
@@ -73,18 +118,38 @@ const Class = () => {
             <div className={cn('main-page')}>
 
                 <div className={cn('container')}>
-                    <h1 className={cn('header')}>Lớp học của bạn</h1>
+                    {
+                        role === "ROLE_ADMIN" ?
+                        <h1 className={cn('header')}>
+                            Tất cả lớp học
+                        </h1>
+                        :
+                        <h1 className={cn('header')}>
+                            Lớp học của bạn
+                        </h1>
+                    }
 
                     {
                         classes.length === 0 ?
                             <div className={cn('no-classes-notification')}>
                                 <img src={noClassImg} alt="no-classes"/>
-                                <p>Bạn chưa có một lớp học nào</p>
-                                <button
-                                    className={cn('btn-add-class')}
-                                    onClick={() => openAddClassForm()}
-                                >Tạo lớp mới
-                                </button>
+                                {
+                                    role === "ROLE_ADMIN" && 
+                                        <>
+                                            <p>Chưa có lớp học trong hệ thống</p>
+                                            <button
+                                                className={cn('btn-add-class')}
+                                                onClick={() => openAddClassForm()}
+                                            >Tạo lớp học
+                                            </button>
+                                        </>
+                                }
+                                {
+                                    role === "ROLE_TEACHER" && <p>Bạn chưa có lớp học nào</p>
+                                }
+                                {
+                                    role === "ROLE_STUDENT" && <p>Bạn chưa tham gia lớp học nào</p>
+                                }
                             </div>
                             :
                             <div>
@@ -103,35 +168,38 @@ const Class = () => {
                                             defaultValue=""
                                         >
                                             <option value="" disabled>--Sắp xếp--</option>
-                                            {
-                                                sortConditionArr.map((condition, index) => (
-                                                    <option
-                                                        key={index}
-                                                        value={condition}
-                                                    >
-                                                        {condition === "className" ? "Tên lớp" : "Môn học"}
-                                                    </option>
-                                                ))
-                                            }
+                                            <option value="className">Tên lớp</option>
+                                            <option value="subject">Môn học</option>
                                         </select>
                                     </div>
 
-                                    <button
-                                        className={cn('btn-add-class')}
-                                        onClick={() => openAddClassForm()}
-                                    >Tạo lớp mới
-                                    </button>
+                                    {
+                                        role === "ROLE_ADMIN" &&
+                                        <button
+                                            className={cn('btn-add-class')}
+                                            onClick={() => openAddClassForm()}
+                                        >Tạo lớp học
+                                        </button>
+                                    }
                                 </div>
 
                                 <div className={cn('list')}>
                                     {
-                                        classes.map((classDto, index) => (
-                                            <Link key={index} className={cn('list-item')}
+                                        classes.map((classDto) => (
+                                            <Link key={classDto.id} className={cn('list-item')}
                                                   to={`/class/${classDto.id}`}>
-                                                <div className={cn('information')}>
-                                                    <p className={cn('class-name')}>{classDto.className}</p>
-                                                    <p className={cn('subject-name')}>{classDto.subject}</p>
-                                                </div>
+                                                {
+                                                    role === "ROLE_ADMIN" ?
+                                                    <div className={cn('information')}>
+                                                        <p className={cn('class-name')}>{classDto.subject} - {classDto.className}</p>
+                                                        <p className={cn('subject-name')}>Giáo viên: {classDto.teacherName}</p>
+                                                    </div>
+                                                    :
+                                                    <div className={cn('information')}>
+                                                        <p className={cn('class-name')}>{classDto.className}</p>
+                                                        <p className={cn('subject-name')}>{classDto.subject}</p>
+                                                    </div>
+                                                }
                                             </Link>
                                         ))
                                     }
@@ -143,9 +211,9 @@ const Class = () => {
                 {
                     popup &&
                     <Popup onClick={() => closePopup()}>
-                    <div className={cn('add-class-form')}>
+                        <div className={cn('add-class-form')}>
                             <div className={cn('form-header')}>
-                            <h1 className={cn('title-add-class')}>Tạo lớp học</h1>
+                                <h1 className={cn('title-add-class')}>Tạo lớp học</h1>
                                 <i className="fa-regular fa-circle-xmark" onClick={() => closePopup()}></i>
                             </div>
 
@@ -164,6 +232,39 @@ const Class = () => {
                                     ))
                                 }
                             </select>
+
+                            <div className={cn('select-teacher')}>
+                                <input
+                                    className={cn('input-class')}
+                                    name='teacher-name'
+                                    type='text'
+                                    placeholder='Giáo viên'
+                                    onFocus={() => setFocused(true)}
+                                    onBlur={() => setFocused(false)}
+                                    autoComplete="off"
+                                    value={newClass.teacherName}
+                                    onChange={(e) => {
+                                        setNewClass({...newClass, teacherName: e.target.value});
+                                    }}
+                                />
+                                {
+                                    focused &&
+                                    <div className={cn('list-teacher')}>
+                                        {
+                                            teachers.map((teacher) => (
+                                                <div 
+                                                    key={teacher.id}
+                                                    onMouseDown={() => {
+                                                        setNewClass({ ...newClass, teacherName: teacher.teacherName })
+                                                    }}
+                                                >
+                                                    {teacher.teacherCode} - {teacher.teacherName}
+                                                </div>
+                                            ))
+                                        }
+                                    </div>
+                                }
+                            </div>
 
                             <input
                                 className={cn('input-class')}

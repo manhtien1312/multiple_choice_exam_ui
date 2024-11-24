@@ -26,15 +26,13 @@ const QuestionBankTable = (prop) => {
     const [questionBankId, setQuestionBankId] = useState('');
     const [questionBank, setQuestionBank] = useState([]);
     const [listQuestionType, setListQuestionType] = useState([]);
-    const [focused, setFocused] = useState(false);
-    const [popup, setPopup] = useState(false);
-    const [message, setMessage] = useState("");
     const [newQuestion, setNewQuestion] = useState({
         type: {
             typeName: "",
         },
         questionCode: "",
         questionContent: "",
+        level: "1",
         answers: [
             {
                 answerContent: "",
@@ -55,6 +53,11 @@ const QuestionBankTable = (prop) => {
         ],
         explanation: "",
     });
+
+    const [image, setImage] = useState("");
+    const [popup, setPopup] = useState(false);
+    const [message, setMessage] = useState("");
+    const [focused, setFocused] = useState(false);
 
     const getQuestionBank = async () => {
         try {
@@ -133,6 +136,14 @@ const QuestionBankTable = (prop) => {
         setNewQuestion({ ...newQuestion, answers: updatedAnswers })
     }
 
+    const handleUploadQuestionImage = (e) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(e.target.files[0]);
+        reader.onload = () => {
+            setImage(reader.result);
+        }
+    }
+
     const handleChangeCorrect = (index) => {
         const updatedAnswers = newQuestion.answers.map((answer, idx) => ({
             ...answer,
@@ -142,11 +153,20 @@ const QuestionBankTable = (prop) => {
     }
 
     const handleAddQuestion = async () => {
-        const res = await axios.post("http://localhost:8080/api/v1/question", newQuestion, {
-            params: {
-                questionBankId: questionBankId
+        const imageFile = document.getElementById("imageInput").files[0];
+        
+        const formData = new FormData();
+        formData.append("questionBankId", questionBankId);
+        formData.append("questionStr", JSON.stringify(newQuestion));
+        formData.append("questionImage", imageFile);
+        const res = await axios.post("http://localhost:8080/api/v1/question",
+            formData, 
+            {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
             }
-        })
+        )
         setMessage(res.data.message);
         closePopup();
     }
@@ -234,11 +254,12 @@ const QuestionBankTable = (prop) => {
                                     onBlur={() => setFocused(false)}
                                     value={newQuestion.type.typeName}
                                     onChange={(e) => {
-                                        setNewQuestion({ ...newQuestion, 
-                                            type: {
-                                                typeName: e.target.value
-                                            }
-                                         })
+                                        setNewQuestion({
+                                          ...newQuestion,
+                                          type: {
+                                            typeName: e.target.value,
+                                          },
+                                        });
                                     }}
                                 />
                                 <input
@@ -251,6 +272,32 @@ const QuestionBankTable = (prop) => {
                                          })
                                     }}
                                 />
+                                <select
+                                    name='question-level'
+                                    className={cn('select-question-level')}
+                                    defaultValue=""
+                                    onChange={(e) => {
+                                        setNewQuestion({
+                                          ...newQuestion,
+                                          level: e.target.value,
+                                        });
+                                    }}
+                                >
+                                    <option value="" disabled>Độ khó</option>
+                                    <option value="1">Dễ</option>
+                                    <option value="2">Trung bình</option>
+                                    <option value="3">Khó</option>            
+                                </select>
+                                <button
+                                    onClick={() => {
+                                        document.getElementById("imageInput").click()
+                                    }}
+                                >Thêm hình ảnh</button>
+                                <input
+                                    type="file" id="imageInput"
+                                    style={{display: 'none'}}
+                                    onChange={(e) => {handleUploadQuestionImage(e)}}
+                                    />
                                 {
                                     focused &&
                                     <div className={cn('list-type')}>
@@ -287,16 +334,24 @@ const QuestionBankTable = (prop) => {
                             
                         </div>
 
-                        <textarea 
-                            className={cn('question-content')} 
-                            placeholder="Nhập nội dung câu hỏi"
-                            value={newQuestion.questionContent}
-                            onChange={(e) => {
-                                setNewQuestion({ ...newQuestion,
-                                    questionContent: e.target.value
-                                 })
-                            }}
-                        />
+                        <div className={cn('question')}>
+                            <textarea 
+                                className={cn('question-content')} 
+                                placeholder="Nhập nội dung câu hỏi"
+                                value={newQuestion.questionContent}
+                                onChange={(e) => {
+                                    setNewQuestion({ ...newQuestion,
+                                        questionContent: e.target.value
+                                     })
+                                }}
+                            />
+                            <img 
+                                className={cn('question-image')} 
+                                src={image}
+                                alt='question-image'
+                                style={{display: image === "" ? 'none' : 'block'}}
+                            />
+                        </div>
 
                         <div className={cn('answers')}>
                             {

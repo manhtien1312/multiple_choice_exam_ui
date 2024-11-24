@@ -1,12 +1,13 @@
-import {useEffect, useState} from "react";
+import {useEffect, useState, useRef} from "react";
 import NavigationBar from "../components/NavigationBar.jsx";
 import classNames from "classnames/bind";
 import styles from "../assets/css/ClassDetail.module.scss";
 import axios from "axios";
-import {useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import {Container, Nav, Navbar} from "react-bootstrap";
 import ExpandableCard from "../components/ExpandableCard.jsx";
 import Popup from "../components/Popup.jsx";
+import routeName from "../config/routename.js";
 
 const cn = classNames.bind(styles);
 
@@ -25,16 +26,42 @@ const ClassDetail = () => {
         }
     )
 
+    const role = localStorage.getItem("role");
+
+    const elementRef = useRef(null);
+    const navigate = useNavigate();
     const { classId } = useParams();
+
     const [classDetail, setClassDetail] = useState({});
     const [teacher, setTeacher] = useState({});
     const [subject, setSubject] = useState({});
     const [students, setStudents] = useState([]);
     const [newStudent, setNewStudent] = useState({});
+    const [selectedStudents, setSelectedStudents] = useState([]);
+    
     const [activeComponent, setActiveComponent] = useState('Activity');
     const [popup, setPopup] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
     const [message, setMessage] = useState('');
-    const [selectedStudents, setSelectedStudents] = useState([]);
+
+    const toggleVisibility = (e) => {
+        e.stopPropagation();
+        setIsVisible(!isVisible);
+    };
+
+    const handleClickOutside = (e) => {
+        if (elementRef.current && !elementRef.current.contains(e.target)) {
+            setIsVisible(false);
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const getClassDetail = async () => {
         const res = await axios.get(`http://localhost:8080/api/v1/class/${classId}`);
@@ -67,7 +94,7 @@ const ClassDetail = () => {
         formData.append("studentFile", studentFile);
 
         try{
-            const res = await axios.post("http://localhost:8080/api/v1/student/add-student-file",
+            const res = await axios.post("http://localhost:8080/api/v1/student/add-student-file-to-class",
                 formData,
                 {
                     headers: { 'Content-Type': 'multipart/form-data' }
@@ -116,6 +143,12 @@ const ClassDetail = () => {
         }
     }
 
+    const handleDeleteClass = async () => {
+        const res = await axios.delete(`http://localhost:8080/api/v1/class/${classId}`)
+        alert(res.data.message);
+        navigate(routeName.class);
+    }
+
     const closePopup = () => {
         setPopup(false);
     }
@@ -128,195 +161,252 @@ const ClassDetail = () => {
     }, [message]);
 
     return (
-        <>
-            <NavigationBar />
+      <>
+        <NavigationBar />
 
-            <div className={cn('main-page')}>
+        <div className={cn("main-page")}>
+          <div className={cn("header")}>
+            <h1 className={cn("title")}>{classDetail.className}</h1>
+            <p>{subject.subjectName}</p>
 
-                <div className={cn('header')}>
-                    <h1 className={cn('title')}>{classDetail.className}</h1>
-                    <p>{subject.subjectName}</p>
+            <Navbar className={cn("class-navbar")}>
+              <Container className={cn("navbar-container")}>
+                <Navbar.Collapse className={cn("collapse")}>
+                  <Nav className={cn("nav")}>
+                    <Nav.Link
+                      className={cn("nav-link", {
+                        active: activeComponent === "Activity",
+                      })}
+                      onClick={() => setActiveComponent("Activity")}
+                    >
+                      Hoạt động
+                    </Nav.Link>
+                    <Nav.Link
+                      className={cn("nav-link", {
+                        active: activeComponent === "Information",
+                      })}
+                      onClick={() => setActiveComponent("Information")}
+                    >
+                      Danh sách sinh viên
+                    </Nav.Link>
+                    <Nav.Link
+                      className={cn("nav-link", {
+                        active: activeComponent === "Report",
+                      })}
+                      onClick={() => setActiveComponent("Report")}
+                    >
+                      Báo cáo điểm
+                    </Nav.Link>
+                  </Nav>
+                </Navbar.Collapse>
+              </Container>
 
-                    <Navbar className={cn('class-navbar')}>
-                        <Container className={cn('navbar-container')}>
-                            <Navbar.Collapse className={cn('collapse')}>
-                                <Nav className={cn('nav')}>
-                                    <Nav.Link
-                                        className={cn('nav-link', {active: activeComponent === 'Activity'})}
-                                        onClick={() => setActiveComponent('Activity')}
-                                    >Hoạt động</Nav.Link>
-                                    <Nav.Link
-                                        className={cn('nav-link', {active: activeComponent === 'Information'})}
-                                        onClick={() => setActiveComponent('Information')}
-                                    >Danh sách sinh viên</Nav.Link>
-                                    <Nav.Link
-                                        className={cn('nav-link', {active: activeComponent === 'Report'})}
-                                        onClick={() => setActiveComponent('Report')}
-                                    >Báo cáo điểm</Nav.Link>
-                                </Nav>
-                            </Navbar.Collapse>
-                        </Container>
-                    </Navbar>
+              {role === "ROLE_ADMIN" && (
+                <div className={cn("setting")}>
+                  <button onClick={(e) => toggleVisibility(e)}>
+                    <i className="fa-solid fa-gear"></i>
+                  </button>
+                  {isVisible && (
+                    <div ref={elementRef} className={cn("action-dropdown")}>
+                      <p
+                        className={cn("dropdown-item")}
+                        onClick={(e) => {
+                          toggleVisibility(e);
+                        }}
+                      >
+                        Chỉnh sửa
+                      </p>
+                      <p
+                        className={cn("dropdown-item")}
+                        onClick={() => {
+                          handleDeleteClass();
+                        }}
+                      >
+                        Xóa
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </Navbar>
+          </div>
+
+          <div className={cn("content")}>
+            {activeComponent === "Activity" && (
+              <div className={cn("activity")}>
+                {/*lấy danh sách bài ôn tập và kiểm tra từ server, truyền vào 2 list item của 2 card để hiển thị*/}
+                <ExpandableCard cardTitle="Ôn tập" listItem={null} />
+                <ExpandableCard cardTitle="Kiểm tra" listItem={null} />
+              </div>
+            )}
+
+            {activeComponent === "Information" && (
+              <div className={cn("information")}>
+                <div className={cn("action")}>
+                  <div className={cn("filter")}>
+                    <input
+                      className={cn("search-box")}
+                      name="search"
+                      type="text"
+                      placeholder="Tìm kiếm"
+                      autoComplete="off"
+                    />
+
+                    <select
+                      name="sort-condition"
+                      className={cn("sort-box")}
+                      defaultValue=""
+                    >
+                      <option value="" disabled>
+                        --Sắp xếp--
+                      </option>
+                    </select>
+                  </div>
+
+                  {role === "ROLE_ADMIN" && (
+                    <div>
+                      {selectedStudents.length > 0 && (
+                        <button
+                          className={cn("btn-delete")}
+                          onClick={() => {
+                            handleRemoveStudents();
+                          }}
+                        >
+                          Xóa đã chọn
+                        </button>
+                      )}
+                      <button
+                        className={cn("btn-add")}
+                        onClick={() => setPopup(true)}
+                      >
+                        Thêm sinh viên
+                      </button>
+                      <button
+                        className={cn("btn-import-file")}
+                        onClick={() => {
+                          document.getElementById("fileInput").click();
+                        }}
+                      >
+                        Import <i className="fa-regular fa-file-excel"></i>
+                      </button>
+                      <input
+                        type="file"
+                        id="fileInput"
+                        style={{ display: "none" }}
+                        onChange={(e) => {
+                          handleUploadStudentFile(e);
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
 
-                <div className={cn('content')}>
+                {students.length === 0 ? (
+                  <div className={cn("no-student-notification")}>
+                    <p>Chưa có sinh viên trong lớp</p>
+                  </div>
+                ) : (
+                  <div>
+                    <table className={cn("student-table")}>
+                      <thead>
+                        <tr>
+                          {role === "ROLE_ADMIN" && (
+                            <th>
+                              <input
+                                type="checkbox"
+                                name="select-all-student"
+                                checked={isAllStudentSelected}
+                                onChange={(e) => handleSelectAll(e)}
+                              />
+                            </th>
+                          )}
+                          <th>STT</th>
+                          <th>Mã sinh viên</th>
+                          <th>Họ và tên</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {students.map((student, index) => (
+                          <tr key={index}>
+                            {role === "ROLE_ADMIN" && (
+                              <td>
+                                <input
+                                  type="checkbox"
+                                  name="select-student"
+                                  checked={selectedStudents.includes(
+                                    student.id
+                                  )}
+                                  onChange={() =>
+                                    handleSelectStudent(student.id)
+                                  }
+                                />
+                              </td>
+                            )}
+                            <td>{index + 1}</td>
+                            <td>{student.studentCode}</td>
+                            <td>{student.studentName}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
 
-                    {
-                        activeComponent === 'Activity' &&
-                        <div className={cn('activity')}>
-                            {/*lấy danh sách bài ôn tập và kiểm tra từ server, truyền vào 2 list item của 2 card để hiển thị*/}
-                            <ExpandableCard cardTitle="Ôn tập" listItem={null}/>
-                            <ExpandableCard cardTitle="Kiểm tra" listItem={null}/>
-                        </div>
-                    }
+            {activeComponent === "Report" && <p>Báo cáo điểm</p>}
+          </div>
 
-                    {
-                        activeComponent === 'Information' &&
-                        <div className={cn('information')}>
-                            <div className={cn('action')}>
-                                <div className={cn('filter')}>
-                                    <input
-                                        className={cn('search-box')}
-                                        name='search'
-                                        type='text'
-                                        placeholder='Tìm kiếm'
-                                        autoComplete="off"/>
-
-                                    <select
-                                        name='sort-condition'
-                                        className={cn('sort-box')}
-                                        defaultValue=""
-                                    >
-                                        <option value="" disabled>--Sắp xếp--</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    {
-                                        selectedStudents.length > 0 &&
-                                        <button
-                                            className={cn('btn-delete')}
-                                            onClick={() => {handleRemoveStudents()}}
-                                        >Xóa đã chọn
-                                        </button>
-                                    }
-                                    <button
-                                        className={cn('btn-add')}
-                                        onClick={() => setPopup(true)}
-                                    >Thêm sinh viên
-                                    </button>
-                                    <button
-                                        className={cn('btn-import-file')}
-                                        onClick={() => {
-                                            document.getElementById("fileInput").click()
-                                        }}
-                                    >Import <i className="fa-regular fa-file-excel"></i>
-                                    </button>
-                                    <input
-                                        type="file" id="fileInput"
-                                        style={{display: 'none'}}
-                                        onChange={(e) => {
-                                            handleUploadStudentFile(e)
-                                        }}/>
-                                </div>
-                            </div>
-
-                            {
-                                students.length === 0 ?
-                                    <div className={cn('no-student-notification')}>
-                                        <p>Chưa có sinh viên trong lớp</p>
-                                    </div>
-                                    :
-                                    <div>
-                                        <table className={cn('student-table')}>
-                                            <thead>
-                                            <tr>
-                                                <th>
-                                                    <input
-                                                        type="checkbox"
-                                                        name="select-all-student"
-                                                        checked={isAllStudentSelected}
-                                                        onChange={(e) => handleSelectAll(e)}
-                                                    />
-                                                </th>
-                                                <th>STT</th>
-                                                <th>Mã sinh viên</th>
-                                                <th>Họ và tên</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            {
-                                                students.map((student, index) => (
-                                                    <tr key={index}>
-                                                        <td>
-                                                            <input
-                                                                type="checkbox"
-                                                                name="select-student"
-                                                                checked={selectedStudents.includes(student.id)}
-                                                                onChange={() => handleSelectStudent(student.id)}
-                                                            />
-                                                        </td>
-                                                        <td>{index + 1}</td>
-                                                        <td>{student.studentCode}</td>
-                                                        <td>{student.studentName}</td>
-                                                    </tr>
-                                                ))
-                                            }
-                                            </tbody>
-                                        </table>
-                                    </div>
-                            }
-                        </div>
-                    }
-
-                    {
-                        activeComponent === 'Report' &&
-                        <p>Báo cáo điểm</p>
-                    }
+          {popup && (
+            <Popup onClick={() => closePopup()}>
+              <div className={cn("add-student-form")}>
+                <div className={cn("form-header")}>
+                  <h1 className={cn("title-add-student")}>Thêm sinh viên</h1>
+                  <i
+                    className="fa-regular fa-circle-xmark"
+                    onClick={() => closePopup()}
+                  ></i>
                 </div>
 
-                {
-                    popup &&
-                    <Popup onClick={() => closePopup()}>
-                        <div className={cn('add-student-form')}>
-                            <div className={cn('form-header')}>
-                                <h1 className={cn('title-add-student')}>Thêm sinh viên</h1>
-                                <i className="fa-regular fa-circle-xmark" onClick={() => closePopup()}></i>
-                            </div>
+                <input
+                  className={cn("input-student")}
+                  name="student-code"
+                  type="text"
+                  placeholder="Mã sinh viên"
+                  autoComplete="off"
+                  onChange={(e) => {
+                    setNewStudent({
+                      ...newStudent,
+                      studentCode: e.target.value,
+                    });
+                  }}
+                />
 
-                            <input
-                                className={cn('input-student')}
-                                name='student-code'
-                                type='text'
-                                placeholder='Mã sinh viên'
-                                autoComplete="off"
-                                onChange={(e) => {
-                                    setNewStudent({ ...newStudent, studentCode: e.target.value });
-                                }}
-                            />
+                <input
+                  className={cn("input-student")}
+                  name="student-name"
+                  type="text"
+                  placeholder="Họ và tên"
+                  autoComplete="off"
+                  onChange={(e) => {
+                    setNewStudent({
+                      ...newStudent,
+                      studentName: e.target.value,
+                    });
+                  }}
+                />
 
-                            <input
-                                className={cn('input-student')}
-                                name='student-name'
-                                type='text'
-                                placeholder='Họ và tên'
-                                autoComplete="off"
-                                onChange={(e) => {
-                                    setNewStudent({ ...newStudent, studentName: e.target.value });
-                                }}
-                            />
-
-                            <button
-                                className={cn('btn-add-student')}
-                                onClick={() => handleAddStudentToClass()}
-                            >
-                                Thêm
-                            </button>
-                        </div>
-                    </Popup>
-                }
-            </div>
-        </>
+                <button
+                  className={cn("btn-add-student")}
+                  onClick={() => handleAddStudentToClass()}
+                >
+                  Thêm
+                </button>
+              </div>
+            </Popup>
+          )}
+        </div>
+      </>
     );
 };
 

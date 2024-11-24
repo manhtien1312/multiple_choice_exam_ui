@@ -1,13 +1,13 @@
-import NavigationBar from "../components/NavigationBar";
-import classNames from "classnames/bind";
-import styles from "../assets/css/SubjectDetail.module.scss";
-import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
 import { Container, Nav, Navbar } from "react-bootstrap";
-import { Link } from "react-router-dom";
-import axios from "axios";
+import NavigationBar from "../components/NavigationBar";
 import QuestionBankTable from "../components/QuestionBankTable";
 import ExamQuestionBankTable from "../components/ExamQuestionBankTable";
+import routeName from "../config/routename";
+import classNames from "classnames/bind";
+import styles from "../assets/css/SubjectDetail.module.scss";
+import axios from "axios";
 
 const cn = classNames.bind(styles);
 
@@ -27,114 +27,130 @@ const SubjectDetail = () => {
     )
 
     const role = localStorage.getItem("role");
+
+    const elementRef = useRef(null);
     const { subjectId } = useParams();
+    const navigate = useNavigate();
 
     const [subject, setSubject] = useState({});
-    const [classes, setClasses] = useState([]);
-    const [activeComponent, setActiveComponent] = useState(role === "ROLE_ADMIN" ? "Classes" : "QuestionBank");
+
+    const [activeComponent, setActiveComponent] = useState("QuestionBank");
+    const [isVisible, setIsVisible] = useState(false);
 
     const getSubject = async () => {
         const res = await axios.get(`http://localhost:8080/api/v1/subject/${subjectId}`);
         setSubject(res.data);
     }
 
-    const getClasses = async () => {
-        const res = await axios.get("http://localhost:8080/api/v1/class/subject-class", {
-                params: {
-                    subjectId: subjectId,
-                }
-            }
-        );
-        setClasses(res.data);
+    const toggleVisibility = (e) => {
+        e.stopPropagation();
+        setIsVisible(!isVisible);
+    };
+
+    const handleClickOutside = (e) => {
+        if (elementRef.current && !elementRef.current.contains(e.target)) {
+            setIsVisible(false);
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    const handleDeleteSubject = async () => {
+        const res = await axios.delete(`http://localhost:8080/api/v1/subject/${subjectId}`)
+        alert(res.data.message);
+        navigate(routeName.subject);
     }
 
     useEffect(() => {
         getSubject();
-        getClasses();
     }, []);
 
     return (
-        <>
-            <NavigationBar />
+      <>
+        <NavigationBar />
 
-            <div className={cn('main-page')}>
+        <div className={cn("main-page")}>
+          <div className={cn("header")}>
+            <h1 className={cn("title")}>{subject.subjectName}</h1>
+            <p>{subject.subjectCode}</p>
 
-                <div className={cn('header')}>
-                    <h1 className={cn('title')}>{subject.subjectName}</h1>
-                    <p>{subject.subjectCode}</p>
+            <Navbar className={cn("class-navbar")}>
+              <Container className={cn("navbar-container")}>
+                <Navbar.Collapse className={cn("collapse")}>
+                  <Nav className={cn("nav")}>
+                    <Nav.Link
+                      className={cn("nav-link", {
+                        active: activeComponent === "QuestionBank",
+                      })}
+                      onClick={() => setActiveComponent("QuestionBank")}
+                    >
+                      Ngân hàng câu hỏi
+                    </Nav.Link>
+                    {role === "ROLE_TEACHER" && (
+                      <Nav.Link
+                        className={cn("nav-link", {
+                          active: activeComponent === "ExamQuestionBank",
+                        })}
+                        onClick={() => setActiveComponent("ExamQuestionBank")}
+                      >
+                        Ngân hàng đề
+                      </Nav.Link>
+                    )}
+                  </Nav>
+                </Navbar.Collapse>
+              </Container>
 
-                    <Navbar className={cn('class-navbar')}>
-                        <Container className={cn('navbar-container')}>
-                            <Navbar.Collapse className={cn('collapse')}>
-                                <Nav className={cn('nav')}>
-                                    {
-                                        role === "ROLE_ADMIN" &&
-                                        <Nav.Link
-                                            className={cn('nav-link', {active: activeComponent === 'Classes'})}
-                                            onClick={() => setActiveComponent('Classes')}
-                                        >Lớp học</Nav.Link>
-                                    }
-                                    <Nav.Link
-                                        className={cn('nav-link', {active: activeComponent === 'QuestionBank'})}
-                                        onClick={() => setActiveComponent('QuestionBank')}
-                                    >Ngân hàng câu hỏi</Nav.Link>
-                                    <Nav.Link
-                                        className={cn('nav-link', {active: activeComponent === 'ExamQuestionBank'})}
-                                        onClick={() => setActiveComponent('ExamQuestionBank')}
-                                    >Ngân hàng đề</Nav.Link>
-                                    <Nav.Link
-                                        className={cn('nav-link', {active: activeComponent === 'Setting'})}
-                                        onClick={() => setActiveComponent('Setting')}
-                                    >Tùy chọn</Nav.Link>
-                                </Nav>
-                            </Navbar.Collapse>
-                        </Container>
-                    </Navbar>
+              {role === "ROLE_ADMIN" && (
+                <div className={cn("setting")}>
+                  <button onClick={(e) => toggleVisibility(e)}>
+                    <i className="fa-solid fa-gear"></i>
+                  </button>
+                  {isVisible && (
+                    <div ref={elementRef} className={cn("action-dropdown")}>
+                      <p
+                        className={cn("dropdown-item")}
+                        onClick={(e) => {
+                          toggleVisibility(e);
+                        }}
+                      >
+                        Chỉnh sửa
+                      </p>
+                      <p
+                        className={cn("dropdown-item")}
+                        onClick={() => {
+                          handleDeleteSubject();
+                        }}
+                      >
+                        Xóa
+                      </p>
+                    </div>
+                  )}
                 </div>
+              )}
+            </Navbar>
+          </div>
 
-                <div className={cn('content')}>
+          <div className={cn("content")}>
+            {activeComponent === "QuestionBank" && (
+              <div className={cn("question-bank")}>
+                <QuestionBankTable subjectId={subjectId} />
+              </div>
+            )}
 
-                    {
-                        activeComponent === 'Classes' &&
-                        <div className={cn('classes')}>
-                            {
-                                classes.map((classDto, index) => (
-                                    <Link key={index} className={cn('list-item')}
-                                                  to={`/class/${classDto.id}`}>
-                                        <div className={cn('information')}>
-                                            <p className={cn('class-name')}>{classDto.className}</p>
-                                            <p className={cn('subject-name')}>Giáo viên: {classDto.teacherName}</p>
-                                        </div>
-                                    </Link>
-                                ))
-                            }
-                        </div>
-                    }
-
-                    {
-                        activeComponent === 'QuestionBank' &&
-                        <div className={cn('question-bank')}>
-                            <QuestionBankTable subjectId={subjectId} />
-                        </div>
-                    }
-
-                    {
-                        activeComponent === 'ExamQuestionBank' &&
-                        <div className={cn('exam-question-bank')}>
-                            <ExamQuestionBankTable subjectId={subjectId} />
-                        </div>
-                    }
-
-{
-                        activeComponent === 'Setting' &&
-                        <div className={cn('setting')}>
-                            tuy chon mon hoc
-                        </div>
-                    }
-
-                </div>
-            </div>
-        </>
+            {activeComponent === "ExamQuestionBank" && (
+              <div className={cn("exam-question-bank")}>
+                <ExamQuestionBankTable subjectId={subjectId} />
+              </div>
+            )}
+          </div>
+        </div>
+      </>
     );
 };
 

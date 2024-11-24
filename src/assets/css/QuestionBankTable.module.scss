@@ -101,12 +101,17 @@
             align-items: center;
             position: relative;
     
-            input{
+            input, select, button{
                 width: 150px;
                 margin-right: 15px;
                 padding: 5px;
                 border: .5px solid #8d8d8d;
                 font-size: 16px;
+                background-color: #fff;
+            }
+
+            button:hover{
+                cursor: pointer;
             }
 
             .list-type{
@@ -163,12 +168,22 @@
         }
     }
 
-    .question-content{
-        height: 200px;
-        font-size: 20px;
-        padding: 10px;
-        text-align: center;    
+    .question{
+        display: flex;
         border: .5px solid #8d8d8d;
+
+        .question-content{
+            width: 100%;
+            height: 200px;
+            font-size: 20px;
+            padding: 10px;
+            text-align: center;    
+            border: none;
+        }
+
+        .question-image{
+            height: 200px;
+        }
     }
 
     .answers{
