@@ -1,0 +1,111 @@
+.practicePage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+    background-color: #f4f7fc;
+    min-height: 100vh;
+  }
+  
+  h1 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 30px;
+    font-weight: bold;
+  }
+  
+  .question-container {
+    width: 100%;
+    max-width: 800px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+  
+  .question-content {
+    font-size: 1.2rem;
+    color: #555;
+    margin-bottom: 20px;
+    text-align: left;
+    white-space: pre-line; /* Giữ định dạng nội dung câu hỏi */
+  }
+  
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .option {
+    background-color: #f9f9f9;
+    padding: 15px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  
+    &:hover {
+      background-color: #e6e6e6;
+    }
+  
+    &.correct {
+      background-color: #d4edda;
+      border-color: #c3e6cb;
+    }
+  
+    &.incorrect {
+      background-color: #f8d7da;
+      border-color: #f5c6cb;
+    }
+  
+    &:disabled {
+      cursor: not-allowed;
+      background-color: #e0e0e0;
+    }
+  }
+  
+  .submit, .next {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 5px;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+  
+    &:hover {
+      background-color: #0056b3;
+    }
+  
+    &:disabled {
+      background-color: #a0a0a0;
+      cursor: not-allowed;
+    }
+  }
+  
+  .feedbackCorrect {
+    color: #28a745;
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+  
+  .feedbackIncorrect {
+    color: #dc3545;
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+  
+  .explanation {
+    font-size: 1rem;
+    color: #333;
+    margin-top: 15px;
+    font-style: italic;
+    text-align: left;
+  }
+  

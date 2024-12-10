@@ -1,11 +1,14 @@
-import React from 'react';
+import NavigationBar from '../components/NavigationBar';
+import routeName from '../config/routename';
 
 const HomePage = () => {
+
   return (
-    <div>
-      Home Page
-    </div>
+    <>
+      <NavigationBar activeKey={routeName.home}/>
+    </>
   );
+
 };
 
 export default HomePage;
