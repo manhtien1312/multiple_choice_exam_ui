@@ -1,0 +1,18 @@
+.notification-content{
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 20%;
+    min-height: 100px;
+    padding: .5rem 1rem;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background-color: #fff;
+    z-index: 100;
+
+    i{
+        font-size: 30px;
+    }
+}

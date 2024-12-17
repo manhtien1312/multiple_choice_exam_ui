@@ -6,12 +6,17 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  position: relative;
 
   .header{
     min-width: 850px;
     height: fit-content;
-    padding: 1.5rem .5rem 0 .5rem;
-    margin-top: 1.5rem;
+    padding: 1rem .5rem 0 .5rem;
+    background-color: #fff;
+    position: sticky;
+    top: 60px;
+    z-index: 99;
+    border-bottom: 1px solid #dee2e6;
 
     .title{
       font-weight: 700;
@@ -121,23 +126,26 @@
                 }
             }
         }
-    }
+      }
     }
   }
 
   .content{
     min-width: 850px;
-    padding: 1.5rem .5rem;
-    border-top: 1px solid #dee2e6;
+    position: relative;
+    margin-bottom: 20px;
 
     .information{
       width: 100%;
       height: fit-content;
-      padding: 0 .5rem 1.5rem .5rem;
 
       .action{
         display: flex;
         justify-content: space-between;
+        position: sticky;
+        top: calc(60px + 10.9rem);
+        background-color: #fff;
+        padding: .5rem;
 
         .filter{
           display: flex;
@@ -219,7 +227,11 @@
       table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 15px;
+      }
+
+      thead{
+        position: sticky;
+        top: calc(60px + 14.15rem);
       }
 
       table,

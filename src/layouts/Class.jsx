@@ -1,12 +1,14 @@
-import {useEffect, useState, useRef} from 'react';
+import {useEffect, useState} from 'react';
+import {Link} from "react-router-dom";
 import NavigationBar from '../components/NavigationBar';
 import Popup from "../components/Popup.jsx";
-import routeName from '../config/routename';
+import Notificattion from '../components/Notificattion.jsx';
+
 import noClassImg from '../assets/images/no-classes.svg';
+import routeName from '../config/routename';
 import classNames from "classnames/bind";
 import styles from "../assets/css/Class.module.scss";
 import axios from "axios";
-import {Link} from "react-router-dom";
 
 
 const cn = classNames.bind(styles);
@@ -28,17 +30,20 @@ const Class = () => {
 
     const role = localStorage.getItem("role");
 
-    const elementRef = useRef(null);
-
     const [classes, setClasses] = useState([]);
     const [subjects, setSubjects] = useState([]);
     const [teachers, setTeachers] = useState([]);
-    const [newClass, setNewClass] = useState({ teacherName: "" });
+    const [newClass, setNewClass] = useState({
+        subject: "",
+        classFile: null
+    });
 
+    const [searchText, setSearchText] = useState("");
     const [popup, setPopup] = useState(false);
-    const [message, setMessage] = useState('');
-    const [focused, setFocused] = useState(false);
-    const [isVisible, setIsVisible] = useState(false);
+    const [response, setResponse] = useState({
+        status: "",
+        message: ""
+      });
 
     const getClasses = async () => {
         let res = {};
@@ -79,41 +84,54 @@ const Class = () => {
     }
 
     const handleCreateClass = async () => {
-        const res = await axios.post("http://localhost:8080/api/v1/class", newClass);
-        setMessage(res.data.message);
-        setPopup(false);
-    }
+        const formData = new FormData();
+        formData.append("subjectName", newClass.subject);
+        formData.append("classFile", newClass.classFile);
 
-    const toggleVisibility = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsVisible(!isVisible);
-    };
-
-    const handleClickOutside = (e) => {
-        if (elementRef.current && !elementRef.current.contains(e.target)) {
-            setIsVisible(false);
+        try {
+            const res = await axios.post("http://localhost:8080/api/v1/class", 
+                formData,
+                {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                }
+            );
+            setResponse({status: "success", message: res.data.message});
+            setTimeout(() => setResponse({status: "", message: ""}), 3000);
+            setPopup(false);
+        } catch (error) {
+            console.log(error);
         }
-    };
 
-    useEffect(() => {
-        document.addEventListener('mousedown', handleClickOutside);
-
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
+    }
 
     useEffect(() => {
         getClasses();
-        if(message !== ""){
-            alert(message);
+    }, [response]);
+
+    useEffect(() => {
+
+        if(!searchText){
+            getClasses();
+            return;
         }
-    }, [message])
+
+        const delay = setTimeout(async () => {
+            const res = await axios.get("http://localhost:8080/api/v1/class/filter", {
+                params: {
+                    searchText: searchText,
+                }
+            });
+            setClasses(res.data);
+        }, 1500);
+
+        return () => clearTimeout(delay);
+    }, [searchText]);
 
     return (
         <>
             <NavigationBar activeKey={routeName.class}/>
+
+            {response.message && <Notificattion response={response} />}
 
             <div className={cn('main-page')}>
 
@@ -129,20 +147,44 @@ const Class = () => {
                         </h1>
                     }
 
+                    <div className={cn('action')}>
+                        <div className={cn('filter')}>
+                            <input
+                                className={cn('search-box')}
+                                name='search'
+                                type='text'
+                                placeholder='Tìm kiếm'
+                                autoComplete="off"
+                                onChange={(e) => setSearchText(e.target.value)}
+                            />
+
+                            <select
+                                name='sort-condition'
+                                className={cn('sort-box')}
+                                defaultValue=""
+                            >
+                                <option value="" disabled>--Sắp xếp--</option>
+                                <option value="className">Tên lớp</option>
+                                <option value="subject">Môn học</option>
+                            </select>
+                        </div>
+
+                        {
+                            role === "ROLE_ADMIN" &&
+                            <button
+                                className={cn('btn-add-class')}
+                                onClick={() => openAddClassForm()}
+                            >Tạo lớp học
+                            </button>
+                        }
+                    </div>
+
                     {
                         classes.length === 0 ?
                             <div className={cn('no-classes-notification')}>
                                 <img src={noClassImg} alt="no-classes"/>
                                 {
-                                    role === "ROLE_ADMIN" && 
-                                        <>
-                                            <p>Chưa có lớp học trong hệ thống</p>
-                                            <button
-                                                className={cn('btn-add-class')}
-                                                onClick={() => openAddClassForm()}
-                                            >Tạo lớp học
-                                            </button>
-                                        </>
+                                    role === "ROLE_ADMIN" && <p>Không có lớp học trong hệ thống</p>
                                 }
                                 {
                                     role === "ROLE_TEACHER" && <p>Bạn chưa có lớp học nào</p>
@@ -153,36 +195,6 @@ const Class = () => {
                             </div>
                             :
                             <div>
-                                <div className={cn('action')}>
-                                    <div className={cn('filter')}>
-                                        <input
-                                            className={cn('search-box')}
-                                            name='search'
-                                            type='text'
-                                            placeholder='Tìm kiếm'
-                                            autoComplete="off"/>
-
-                                        <select
-                                            name='sort-condition'
-                                            className={cn('sort-box')}
-                                            defaultValue=""
-                                        >
-                                            <option value="" disabled>--Sắp xếp--</option>
-                                            <option value="className">Tên lớp</option>
-                                            <option value="subject">Môn học</option>
-                                        </select>
-                                    </div>
-
-                                    {
-                                        role === "ROLE_ADMIN" &&
-                                        <button
-                                            className={cn('btn-add-class')}
-                                            onClick={() => openAddClassForm()}
-                                        >Tạo lớp học
-                                        </button>
-                                    }
-                                </div>
-
                                 <div className={cn('list')}>
                                     {
                                         classes.map((classDto) => (
@@ -233,49 +245,25 @@ const Class = () => {
                                 }
                             </select>
 
-                            <div className={cn('select-teacher')}>
-                                <input
-                                    className={cn('input-class')}
-                                    name='teacher-name'
-                                    type='text'
-                                    placeholder='Giáo viên'
-                                    onFocus={() => setFocused(true)}
-                                    onBlur={() => setFocused(false)}
-                                    autoComplete="off"
-                                    value={newClass.teacherName}
-                                    onChange={(e) => {
-                                        setNewClass({...newClass, teacherName: e.target.value});
-                                    }}
-                                />
-                                {
-                                    focused &&
-                                    <div className={cn('list-teacher')}>
-                                        {
-                                            teachers.map((teacher) => (
-                                                <div 
-                                                    key={teacher.id}
-                                                    onMouseDown={() => {
-                                                        setNewClass({ ...newClass, teacherName: teacher.teacherName })
-                                                    }}
-                                                >
-                                                    {teacher.teacherCode} - {teacher.teacherName}
-                                                </div>
-                                            ))
-                                        }
-                                    </div>
-                                }
-                            </div>
-
                             <input
-                                className={cn('input-class')}
-                                name='class-name'
-                                type='text'
+                                className={cn('input-file')}
+                                name='file'
+                                id='file'
+                                type='file'
                                 placeholder='Tên lớp'
                                 autoComplete="off"
                                 onChange={(e) => {
-                                    setNewClass({...newClass, className: e.target.value});
+                                    setNewClass({...newClass, classFile: e.target.files[0]});
                                 }}
                             />
+                            <label htmlFor="file">
+                                <i className="fa-solid fa-upload"></i>
+                                {
+                                    newClass.classFile 
+                                    ? newClass.classFile.name 
+                                    : "Upload danh sách lớp"
+                                }
+                            </label>
 
                             <button
                                 className={cn('btn-add-class')}

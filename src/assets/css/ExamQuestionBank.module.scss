@@ -88,7 +88,7 @@
 }
 
 .create-examquestion-form{
-    width: 400px;
+    width: fit-content;
     height: fit-content;
     padding: 20px;
     background-color: #ffffff;
@@ -119,9 +119,9 @@
       }
     }
   
-    .total-question{
+    .examquestion-code{
         display: flex;
-        justify-content: space-between;
+        gap: 15px;
         align-items: center;
         margin-bottom: 15px;
 
@@ -156,33 +156,31 @@
         font-size: larger;
     }
 
-    .questions-by-type{
+    table{
+        margin: 15px 0;
+
+        th, td{
+            padding: 10px;
+
+            input{
+                width: 80px;
+                padding: 0 10px;
+                height: 35px;
+                font-size: 1rem;
+            }
+        }
+    }
+
+
+    .total-question{
         display: flex;
-        justify-content: space-between;
+        gap: 50px;
         align-items: center;
-        margin-top: 15px;
+        margin-bottom: 15px;
 
         label{
+            font-weight: 700;
             font-size: larger;
-        }
-
-        input{
-            width: 50%;
-            height: calc(1.5em + 1rem + 2px);
-            padding: .5rem 1rem;
-            font-size: 1.171875rem;
-            line-height: 1.5;
-            border: 1px solid #8f959e;
-            border-radius: .6rem;
-            color: #495057;
-        
-            &:focus {
-              color: #495057;
-              background-color: #fff;
-              border-color: #5babf2;
-              outline: 0;
-              box-shadow: 0 0 0 .2rem rgb(15 108 191 / .75);
-            }
         }
     }
   

@@ -38,6 +38,7 @@ const ClassDetail = () => {
     const [students, setStudents] = useState([]);
     const [newStudent, setNewStudent] = useState({});
     const [selectedStudents, setSelectedStudents] = useState([]);
+    const [exams, setExams] = useState([]);
     
     const [activeComponent, setActiveComponent] = useState('Activity');
     const [popup, setPopup] = useState(false);
@@ -68,7 +69,34 @@ const ClassDetail = () => {
         setClassDetail(res.data);
         setTeacher(res.data.teacher);
         setSubject(res.data.subject);
-        setStudents(res.data.students);
+        setStudents(res.data.students.sort((student1, student2) =>
+          student1.studentFirstName.localeCompare(student2.studentFirstName)))
+    }
+
+    const getExams = async () => {
+        if(role === "ROLE_TEACHER"){
+          const res = await axios.get(
+            "http://localhost:8080/api/v1/exam/teacher",
+            {
+              params: {
+                classId: classId,
+              },
+            }
+          );
+          setExams(res.data);
+        }
+
+        if(role === "ROLE_STUDENT"){
+          const res = await axios.get(
+            "http://localhost:8080/api/v1/exam/student",
+            {
+              params: {
+                classId: classId,
+              },
+            }
+          );
+          setExams(res.data);
+        }
     }
 
     const handleAddStudentToClass = async () => {
@@ -155,6 +183,7 @@ const ClassDetail = () => {
 
     useEffect(() => {
         getClassDetail();
+        getExams();
         if(message !== ''){
             alert(message);
         }
@@ -236,7 +265,11 @@ const ClassDetail = () => {
               <div className={cn("activity")}>
                 {/*lấy danh sách bài ôn tập và kiểm tra từ server, truyền vào 2 list item của 2 card để hiển thị*/}
                 <ExpandableCard cardTitle="Ôn tập" listItem={null} />
-                <ExpandableCard cardTitle="Kiểm tra" listItem={null} />
+                <ExpandableCard 
+                  cardTitle="Kiểm tra" 
+                  classId={classId}
+                  listItem={exams} 
+                />
               </div>
             )}
 
@@ -251,16 +284,6 @@ const ClassDetail = () => {
                       placeholder="Tìm kiếm"
                       autoComplete="off"
                     />
-
-                    <select
-                      name="sort-condition"
-                      className={cn("sort-box")}
-                      defaultValue=""
-                    >
-                      <option value="" disabled>
-                        --Sắp xếp--
-                      </option>
-                    </select>
                   </div>
 
                   {role === "ROLE_ADMIN" && (
@@ -280,14 +303,6 @@ const ClassDetail = () => {
                         onClick={() => setPopup(true)}
                       >
                         Thêm sinh viên
-                      </button>
-                      <button
-                        className={cn("btn-import-file")}
-                        onClick={() => {
-                          document.getElementById("fileInput").click();
-                        }}
-                      >
-                        Import <i className="fa-regular fa-file-excel"></i>
                       </button>
                       <input
                         type="file"
@@ -344,7 +359,7 @@ const ClassDetail = () => {
                             )}
                             <td>{index + 1}</td>
                             <td>{student.studentCode}</td>
-                            <td>{student.studentName}</td>
+                            <td>{student.studentFullName}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -391,7 +406,7 @@ const ClassDetail = () => {
                   onChange={(e) => {
                     setNewStudent({
                       ...newStudent,
-                      studentName: e.target.value,
+                      studentFullName: e.target.value,
                     });
                   }}
                 />

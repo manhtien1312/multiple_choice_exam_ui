@@ -8,6 +8,7 @@ const routeName = {
   subject: '/subject',
   subjectDetail: '/subject/:subjectId',
   examQuestionDetail: '/exam-question/:examQuestionId',
+  createExam: '/class/:classId/new-exam',
 }
 
 export default routeName

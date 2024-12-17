@@ -23,10 +23,12 @@ const ExamQuestionBankTable = (prop) => {
     )
 
     const [listExamQuestion, setListExamQuestion] = useState([]);
-    const [popup, setPopup] = useState(false);
     const [examQuestionDetail, setExamQuestionDetail] = useState([]);
     const [createRequest, setCreateRequest] = useState({ subjectId: prop.subjectId });
+    const [totalQuestions, setTotalQuestions] = useState(0);
+
     const [message, setMessage] = useState("");
+    const [popup, setPopup] = useState(false);
 
     const getListExamQuestion = async () => {
         const res = await axios.get("http://localhost:8080/api/v1/exam-question", {
@@ -45,19 +47,31 @@ const ExamQuestionBankTable = (prop) => {
         });
         setExamQuestionDetail(res.data.map((type) => ({
             ...type,
-            numberOfQuestions: 0
+            easy: 0,
+            medium: 0,
+            hard: 0
         })))
     }
 
-    const handleChangeDetail = (index, e) => {
+    const handleChangeDetail = (e, index) => {
+        const { name, value } = e.target;
         const updatedDetail = [ ...examQuestionDetail ];
-        updatedDetail[index].numberOfQuestions = parseInt(e.target.value, 10);
+        updatedDetail[index][name] = parseInt(value, 10);
+        
+        setTotalQuestions(
+            updatedDetail.reduce(
+                (sum, type) => sum + type.easy + type.medium + type.hard,
+                0
+            )
+        );
         setExamQuestionDetail(updatedDetail);
         setCreateRequest({ ...createRequest, details: updatedDetail })
     }
 
     const handleCreateExamQuestion = async () => {
-        const res = await axios.post("http://localhost:8080/api/v1/exam-question/create", createRequest);
+        const res = await axios.post("http://localhost:8080/api/v1/exam-question/create", 
+            { ...createRequest, totalQuestions: totalQuestions }
+        );
         setMessage(res.data.message);
         setPopup(false);
     }
@@ -115,7 +129,7 @@ const ExamQuestionBankTable = (prop) => {
                             <i className="fa-regular fa-circle-xmark" onClick={() => setPopup(false)}></i>
                         </div>
 
-                        <div className={cn('total-question')}>
+                        <div className={cn('examquestion-code')}>
                             <label>Mã đề thi:</label>
                             <input
                                 name='examquestion-code'
@@ -127,34 +141,56 @@ const ExamQuestionBankTable = (prop) => {
                             />
                         </div>
 
-                        <div className={cn('total-question')}>
-                            <label>Tổng số câu hỏi:</label>
-                            <input
-                                name='total-question'
-                                type='number'
-                                autoComplete="off"
-                                onChange={(e) => {
-                                    setCreateRequest({ ...createRequest, totalQuestions: parseInt(e.target.value, 10) })
-                                }}
-                            />
-                        </div>
-
                         <p>Số lượng câu hỏi theo từng loại:</p>
 
-                        {
-                            examQuestionDetail.map((type, index) => (
-                                <div key={type.id} className={cn('questions-by-type')}>
-                                    <label>{type.typeName}:</label>
-                                    <input
-                                        name='number-questions-type'
-                                        type='number'
-                                        autoComplete="off"
-                                        value={type.numberOfQuestions}
-                                        onChange={(e) => {handleChangeDetail(index, e)}}
-                                    />
-                                </div>
-                            ))
-                        }
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Dễ</th>
+                                    <th>Trung bình</th>
+                                    <th>Khó</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {
+                                    examQuestionDetail.map((type, index) => (
+                                        <tr key={type.id}>
+                                            <td>{type.typeName}</td>
+                                            <td>
+                                                <input
+                                                    name='easy'
+                                                    type='number'
+                                                    value={type.easy}
+                                                    onChange={(e) => handleChangeDetail(e, index)}
+                                                />
+                                            </td>
+                                            <td>
+                                                <input
+                                                    name='medium'
+                                                    type='number'
+                                                    value={type.medium}
+                                                    onChange={(e) => handleChangeDetail(e, index)}
+                                                />
+                                            </td>
+                                            <td>
+                                                <input
+                                                    name='hard'
+                                                    type='number'
+                                                    value={type.hard}
+                                                    onChange={(e) => handleChangeDetail(e, index)}
+                                                />
+                                            </td>
+                                        </tr>
+                                    ))
+                                }
+                            </tbody>
+                        </table>
+
+                        <div className={cn('total-question')}>
+                            <label>Tổng số câu hỏi:</label>
+                            <p>{totalQuestions}</p>
+                        </div>
 
                         <button
                             className={cn('btn-add-teacher')}

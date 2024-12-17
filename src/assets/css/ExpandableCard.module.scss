@@ -1,5 +1,5 @@
 .activity-item{
-  margin-bottom: 16px;
+  margin-top: 16px;
   padding: 1rem;
   border: 1px solid #dee2e6;
   border-radius: 1rem;
@@ -61,6 +61,26 @@
       .item-name{
         font-size: 1.1rem;
         color: #0f6cbf;
+      }
+
+      .exam-state{
+        color: #707070;
+      }
+
+      button{
+        width: fit-content;
+        padding: 0 .75rem;
+        font-size: .9375rem;
+        line-height: 1.5;
+        border: none;
+        border-radius: .6rem;
+        color: #fff;
+        background-color: #0f6cbf;
+
+        &:hover{
+          cursor: pointer;
+          background-color: #0c589c;
+        }
       }
     }
 

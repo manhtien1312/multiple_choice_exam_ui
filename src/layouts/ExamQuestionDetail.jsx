@@ -25,12 +25,17 @@ const ExamQuestionDetail = () => {
 
     const { examQuestionId } = useParams();
 
+    const [subject, setSubject] = useState({});
+    const [questionBankId, setQuestionBankId] = useState("");
+    const [questionBank, setQuestionBank] = useState([]);
+    const [fullQuestionBank, setFullQuestionBank] = useState([]);
     const [examQuestion, setExamQuestion] = useState({});
     const [listQuestion, setListQuestion] = useState([]);
-    const [subject, setSubject] = useState({});
-    const [change, setChange] = useState(false);
-    const [questionBank, setQuestionBank] = useState([]);
+    const [listQuestionType, setListQuestionType] = useState([]);
+    const [filterRequest, setFilterRequest] = useState({ type: "", level: 0, searchText: "" });
     const [changeQuestionRequest, setChangeQuestionRequest] = useState({});
+    
+    const [change, setChange] = useState(false);
     const [popup, setPopup] = useState(false);
 
     const getExamQuestion = async () => {
@@ -49,6 +54,46 @@ const ExamQuestionDetail = () => {
             },
         });
         setQuestionBank(res.data.questions);
+        setFullQuestionBank(res.data.questions);
+        setQuestionBankId(res.data.id);
+    }
+
+    const getQuestionType = async () => {
+        const res = await axios.get("http://localhost:8080/api/v1/question-type", {
+            params: {
+                subjectId: subject.id
+            }
+        });
+        setListQuestionType(res.data);
+    }
+
+    const handleFilterQuestion = async (e) => {
+        const { name, value } = e.target;
+
+        if(name === "question-type"){
+            setFilterRequest({ ...filterRequest, type: value });
+            const res = await axios.get("http://localhost:8080/api/v1/question/filter", {
+                params: {
+                    questionBankId: questionBankId,
+                    typeName: value,
+                    level: filterRequest.level,
+                    searchText: filterRequest.searchText
+                }
+            });
+            setQuestionBank(res.data);
+        }
+        else {
+            setFilterRequest({ ...filterRequest, level: parseInt(value, 10) });
+            const res = await axios.get("http://localhost:8080/api/v1/question/filter", {
+                params: {
+                    questionBankId: questionBankId,
+                    typeName: filterRequest.type,
+                    level: parseInt(value, 10),
+                    searchText: filterRequest.searchText
+                }
+            });
+            setQuestionBank(res.data);
+        }
     }
 
     const handleChangeQuestion = async () => {
@@ -60,6 +105,28 @@ const ExamQuestionDetail = () => {
     useEffect(() => {
         getExamQuestion();
     }, []);
+
+    useEffect(() => {
+
+        if(!filterRequest.searchText){
+            setQuestionBank(fullQuestionBank);
+            return;
+        }
+
+        const delay = setTimeout(async () => {
+            const res = await axios.get("http://localhost:8080/api/v1/question/filter", {
+                params: {
+                    questionBankId: questionBankId,
+                    typeName: filterRequest.type,
+                    level: filterRequest.level,
+                    searchText: filterRequest.searchText
+                }
+            });
+            setQuestionBank(res.data);
+          }, 1500);
+
+        return () => clearTimeout(delay);
+    }, [filterRequest.searchText]);
 
     return (
         <>
@@ -84,12 +151,20 @@ const ExamQuestionDetail = () => {
                                 listQuestion.map((question) => (
                                         <div key={question.id} className={cn("question-item-container")}>
                                             <div className={cn('head')}>
-                                                <p>Câu {question.questionCode.substr(2, question.questionCode.length-2)}</p>
+                                                <div className={cn('question-information')}>
+                                                    <p>Câu {question.questionCode.substr(2, question.questionCode.length-2)}</p>
+                                                    <p>{question.type.typeName}</p>
+                                                    <p>Độ khó: {
+                                                            question.level === 1 ? "Dễ" :
+                                                            question.level === 2 ? "Trung bình" : "Khó"
+                                                        }</p>
+                                                </div>
                                                 <div className={cn('question-action')}>
                                                     <button
                                                         onClick={() => {
                                                             setChangeQuestionRequest({ ...changeQuestionRequest, oldQuestion: question })
                                                             getQuestionBank();
+                                                            getQuestionType();
                                                             setChange(true)
                                                         }}
                                                     ><i className="fa-solid fa-rotate"></i>
@@ -100,6 +175,16 @@ const ExamQuestionDetail = () => {
                                             <div className={cn('question-content')}>
                                                 <p>{question.questionContent}</p>
                                             </div>
+
+                                            {
+                                                question.imageUrl &&
+                                                <div className={cn('question-image')}>
+                                                    <img 
+                                                        src={question.imageUrl}
+                                                        alt='question-image'
+                                                    />
+                                                </div>
+                                            }
 
                                             <div className={cn('answers')}>
                                                 {
@@ -121,8 +206,48 @@ const ExamQuestionDetail = () => {
                     change &&
                     <div className={cn('content')}>
                         <div className={cn('detail')}>
-                            <p className={cn('code')}>Đổi câu hỏi: {changeQuestionRequest.oldQuestion.questionCode.substr(2, changeQuestionRequest.oldQuestion.questionCode.length-2)}</p>
+                            <p className={cn('code')}>Bạn muốn đổi câu hỏi {changeQuestionRequest.oldQuestion.questionCode.substr(2, changeQuestionRequest.oldQuestion.questionCode.length-2)} thành:</p>
                             <button onClick={() => {setChange(false)}}>Hủy</button>
+                        </div>
+
+                        <div className={cn('filter')}>
+                            <input
+                                className={cn('search-box')}
+                                name='search'
+                                type='text'
+                                placeholder='Tìm kiếm'
+                                autoComplete="off"
+                                onChange={(e) => setFilterRequest({ ...filterRequest, searchText: e.target.value })}
+                            />
+
+                            <select
+                                name='question-type'
+                                className={cn('select-question-type')}
+                                defaultValue=""
+                                onChange={(e) => handleFilterQuestion(e)}
+                            >
+                                <option value="">--Loại câu hỏi--</option>
+                                {
+                                    listQuestionType.map((type) => (
+                                        <option 
+                                            key={type.id}
+                                            value={type.typeName}
+                                        >{type.typeName}</option>
+                                    ))
+                                }          
+                            </select>     
+
+                            <select
+                                name='question-level'
+                                className={cn('select-question-level')}
+                                defaultValue=""
+                                onChange={(e) => handleFilterQuestion(e)}
+                            >
+                                <option value="0">--Độ khó--</option>
+                                <option value="1">Dễ</option>
+                                <option value="2">Trung bình</option>
+                                <option value="3">Khó</option>            
+                            </select>          
                         </div>
 
                         <div className={cn('list-question')}>
@@ -130,7 +255,14 @@ const ExamQuestionDetail = () => {
                                 questionBank.map((question) => ( (!listQuestion.some(examQuestion => examQuestion.id === question.id)) &&
                                         <div key={question.id} className={cn("question-item-container")}>
                                             <div className={cn('head')}>
-                                                <p>Câu {question.questionCode.substr(2, question.questionCode.length-2)}</p>
+                                                <div className={cn('question-information')}>
+                                                    <p>Câu {question.questionCode.substr(2, question.questionCode.length-2)}</p>
+                                                    <p>{question.type.typeName}</p>
+                                                    <p>Độ khó: {
+                                                            question.level === 1 ? "Dễ" :
+                                                            question.level === 2 ? "Trung bình" : "Khó"
+                                                        }</p>
+                                                </div>
                                                 <div className={cn('question-action')}>
                                                     <button
                                                         onClick={() => {
@@ -140,13 +272,23 @@ const ExamQuestionDetail = () => {
                                                             setPopup(true);
                                                         }}
                                                     ><i className="fa-solid fa-rotate"></i>
-                                                    Thay đổi</button>
+                                                    Thay thế</button>
                                                 </div>
                                             </div>
 
                                             <div className={cn('question-content')}>
                                                 <p>{question.questionContent}</p>
                                             </div>
+
+                                            {
+                                                question.imageUrl &&
+                                                <div className={cn('question-image')}>
+                                                    <img 
+                                                        src={question.imageUrl}
+                                                        alt='question-image'
+                                                    />
+                                                </div>
+                                            }
 
                                             <div className={cn('answers')}>
                                                 {

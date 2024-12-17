@@ -28,8 +28,10 @@ const Subject = () => {
     const role = localStorage.getItem("role");
 
 	const [subjects, setSubjects] = useState([]);
-	const [popup, setPopup] = useState(false);
 	const [newSubject, setNewSubject] = useState({});
+    
+    const [searchText, setSearchText] = useState("");
+	const [popup, setPopup] = useState(false);
 	const [message, setMessage] = useState('');
 
 	const getSubjects = async () => {
@@ -60,6 +62,25 @@ const Subject = () => {
         }
 	}, [message]);
 
+    useEffect(() => {
+
+        if(!searchText){
+            getSubjects();
+            return;
+        }
+
+        const delay = setTimeout(async () => {
+            const res = await axios.get("http://localhost:8080/api/v1/subject/filter", {
+                params: {
+                    searchText: searchText,
+                }
+            });
+            setSubjects(res.data);
+        }, 1500);
+
+        return () => clearTimeout(delay);
+    }, [searchText]);
+
     return (
         <>
 			<NavigationBar activeKey={routeName.subject}/>
@@ -69,48 +90,36 @@ const Subject = () => {
 			<div className={cn('container')}>
                     <h1 className={cn('header')}>Tất cả môn học</h1>
 
+                    <div className={cn('action')}>
+                        <div className={cn('filter')}>
+                            <input
+                                className={cn('search-box')}
+                                name='search'
+                                type='text'
+                                placeholder='Tìm kiếm'
+                                autoComplete="off"
+                                onChange={(e) => setSearchText(e.target.value)}
+                            />
+                        </div>
+
+                        {
+                            role === "ROLE_ADMIN" &&
+                            <button
+                                className={cn('btn-add-class')}
+                                onClick={() => setPopup(true)}
+                            >Thêm môn học
+                            </button>
+                        }
+                    </div>
+
                     {
                         subjects.length === 0 ?
                             <div className={cn('no-subjects-notification')}>
                                 <img src={noSubjectImg} alt="no-subjects"/>
-                                <p>Chưa có môn học nào trong hệ thống</p>
-                                <button
-                                    className={cn('btn-add-class')}
-                                    onClick={() => setPopup(true)}
-                                >Thêm môn học
-                                </button>
+                                <p>Không có môn học nào trong hệ thống</p>
                             </div>
                             :
                             <div>
-                                <div className={cn('action')}>
-                                    <div className={cn('filter')}>
-                                        <input
-                                            className={cn('search-box')}
-                                            name='search'
-                                            type='text'
-                                            placeholder='Tìm kiếm'
-                                            autoComplete="off"/>
-
-                                        <select
-                                            name='sort-condition'
-                                            className={cn('sort-box')}
-                                            defaultValue=""
-                                        >
-                                            <option value="" disabled>--Sắp xếp--</option>
-                                            
-                                        </select>
-                                    </div>
-
-                                    {
-                                        role === "ROLE_ADMIN" &&
-                                        <button
-                                            className={cn('btn-add-class')}
-                                            onClick={() => setPopup(true)}
-                                        >Thêm môn học
-                                        </button>
-                                    }
-                                </div>
-
                                 <div className={cn('list')}>
                                     {
                                         subjects.map((subject, index) => (
