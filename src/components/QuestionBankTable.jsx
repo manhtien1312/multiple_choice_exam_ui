@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
+import QuestionItem from './QuestionItem';
+import Notificattion from '../components/Notificattion.jsx';
+import Popup from './Popup';
 import classNames from 'classnames/bind';
 import styles from '../assets/css/QuestionBankTable.module.scss';
 import axios from 'axios';
-import QuestionItem from './QuestionItem';
-import Popup from './Popup';
 
 const cn = classNames.bind(styles);
 
@@ -56,7 +57,10 @@ const QuestionBankTable = (prop) => {
 
     const [image, setImage] = useState("");
     const [popup, setPopup] = useState(false);
-    const [message, setMessage] = useState("");
+    const [response, setResponse] = useState({
+        status: "",
+        message: ""
+    });
     const [focused, setFocused] = useState(false);
 
     const getQuestionBank = async () => {
@@ -118,7 +122,8 @@ const QuestionBankTable = (prop) => {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 }
             );
-            setMessage(res.data.message);
+            setResponse({status: "success", message: res.data.message});
+            setTimeout(() => setResponse({status: "", message: ""}), 3000);
         }
         catch (error){
             console.log(error);
@@ -128,6 +133,27 @@ const QuestionBankTable = (prop) => {
     const openAddQuestionForm = () => {
         getQuestionType();
         setPopup(true);
+    }
+
+    const handleChooseQuestionType = async (questionType) => {
+        try {
+            const res = await axios.get("http://localhost:8080/api/v1/question/newest-questionCode", {
+                params : {
+                    typeName: questionType.typeName,
+                    questionBankId: questionBankId
+                }
+            })
+            const questionCodeParts = res.data.split(".");
+            const nextQuestionCode = `${questionCodeParts[1]}.${(parseInt(questionCodeParts[2], 10) + 1).toString()}`;
+            setNewQuestion({ ...newQuestion,
+                type: {
+                    typeName: questionType.typeName
+                },
+                questionCode: nextQuestionCode
+            });
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     const handleChangeContent = (index, e) => {
@@ -167,7 +193,8 @@ const QuestionBankTable = (prop) => {
                 },
             }
         )
-        setMessage(res.data.message);
+        setResponse({status: "success", message: res.data.message});
+        setTimeout(() => setResponse({status: "", message: ""}), 3000);
         closePopup();
     }
 
@@ -177,14 +204,12 @@ const QuestionBankTable = (prop) => {
 
     useEffect(() => {
         getQuestionBank();
-        if(message !== ""){
-            alert(message);
-            setMessage("");
-        }
-    }, [message, questionBankType]);
+    }, [response.message, questionBankType]);
 
     return (
         <>
+            {response.message && <Notificattion response={response} />}
+            
             <div className={cn('action')}>
                 <div className={cn('filter')}>
                     <input
@@ -305,13 +330,7 @@ const QuestionBankTable = (prop) => {
                                             listQuestionType.map((questionType) => (
                                                 <div 
                                                     key={questionType.id}
-                                                    onMouseDown={() => {
-                                                        setNewQuestion({ ...newQuestion,
-                                                            type: {
-                                                                typeName: questionType.typeName
-                                                            }
-                                                         })
-                                                    }}
+                                                    onMouseDown={() => {handleChooseQuestionType(questionType)}}
                                                 >
                                                     {questionType.typeName}
                                                 </div>

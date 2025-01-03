@@ -188,7 +188,7 @@ const CreateExamPage = () => {
                 setTimeout(() => {
                     setResponse({status: "", message: ""});
                     window.history.back();
-                }, 3000);
+                }, 2000);
             } catch (error) {
                 setResponse({status: "failure", message: error.response.data.message});
                 setTimeout(() => setResponse({ status: "", message: "" }), 3000);

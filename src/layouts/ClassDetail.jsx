@@ -74,7 +74,7 @@ const ClassDetail = () => {
     }
 
     const getExams = async () => {
-        if(role === "ROLE_TEACHER"){
+        if(role === "ROLE_TEACHER" || role === "ROLE_ADMIN"){
           const res = await axios.get(
             "http://localhost:8080/api/v1/exam/teacher",
             {
@@ -97,6 +97,26 @@ const ClassDetail = () => {
           );
           setExams(res.data);
         }
+    }
+
+    const handleExportStudentsList = async () => {
+      const res = await axios.get("http://localhost:8080/api/v1/class/export-class-students", {
+        params: {
+            classId: classId,
+        },
+        responseType: 'blob',
+      });
+
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      const fileName = `${classDetail.className}-${subject.subjectName}.xlsx`;
+      link.setAttribute('download', fileName);
+
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
     }
 
     const handleAddStudentToClass = async () => {
@@ -298,6 +318,11 @@ const ClassDetail = () => {
                           Xóa đã chọn
                         </button>
                       )}
+                      <button
+                        className={cn('btn-file')}
+                        onClick={() => handleExportStudentsList()}
+                      >Export <i className="fa-regular fa-file-excel"></i>
+                      </button>
                       <button
                         className={cn("btn-add")}
                         onClick={() => setPopup(true)}

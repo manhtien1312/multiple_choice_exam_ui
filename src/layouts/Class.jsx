@@ -32,7 +32,7 @@ const Class = () => {
 
     const [classes, setClasses] = useState([]);
     const [subjects, setSubjects] = useState([]);
-    const [teachers, setTeachers] = useState([]);
+    // const [teachers, setTeachers] = useState([]);
     const [newClass, setNewClass] = useState({
         subject: "",
         classFile: null
@@ -68,14 +68,14 @@ const Class = () => {
         setSubjects(res.data);
     }
 
-    const getTeacher = async () => {
-        const res = await axios.get("http://localhost:8080/api/v1/teacher");
-        setTeachers(res.data);
-    }
+    // const getTeacher = async () => {
+    //     const res = await axios.get("http://localhost:8080/api/v1/teacher");
+    //     setTeachers(res.data);
+    // }
 
     const openAddClassForm = () => {
         getSubjects();
-        getTeacher();
+        // getTeacher();
         setPopup(true);
     }
 
@@ -99,7 +99,8 @@ const Class = () => {
             setTimeout(() => setResponse({status: "", message: ""}), 3000);
             setPopup(false);
         } catch (error) {
-            console.log(error);
+            setResponse({status: "failure", message: error.response.data.message});
+            setTimeout(() => setResponse({status: "", message: ""}), 3000);
         }
 
     }

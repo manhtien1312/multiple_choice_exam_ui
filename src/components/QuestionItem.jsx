@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Popup from './Popup.jsx';
+import Notificattion from '../components/Notificattion.jsx';
 import classNames from 'classnames/bind';
 import styles from '../assets/css/QuestionItem.module.scss';
 import axios from 'axios';
@@ -27,6 +28,10 @@ const QuestionItem = (prop) => {
 
     const [modifyPopup, setModifyPopup] = useState(false);
     const [deletePopup, setDeletePopup] = useState(false);
+    const [response, setResponse] = useState({
+        status: "",
+        message: ""
+    });
 
     let questionLevel = "";
     switch (question.level) {
@@ -85,20 +90,26 @@ const QuestionItem = (prop) => {
                 },
             }
         );
-        alert(res.data.message);
-        setModifyPopup(false);
-        window.location.reload();
+        setResponse({status: "success", message: res.data.message});
+        setTimeout(() => {
+            setResponse({status: "", message: ""});
+            window.location.reload();
+        }, 2000);
     }
 
     const handleDeleteQuestion = async () => {
         const res = await axios.delete(`http://localhost:8080/api/v1/question/${prop.question.id}`)
-        alert(res.data.message);
-        setDeletePopup(false);
-        window.location.reload();
+        setResponse({status: "success", message: res.data.message});
+        setTimeout(() => {
+            setResponse({status: "", message: ""});
+            window.location.reload();
+        }, 2000);
     }
 
     return (
         <>
+            {response.message && <Notificattion response={response} />}
+
             <div className={cn("question-item-container")}>
                 <div className={cn('head')}>
                     <div className={cn('question-information')}>
