@@ -1,0 +1,202 @@
+.action{
+    display: flex;
+    justify-content: space-between;
+    position: sticky;
+    top: 60px;
+    background-color: #fff;
+
+    .search-box{
+        height: calc(1.5em + 0.75rem + 2px);
+        padding: .375rem .75rem;
+        margin-right: 5px;
+        font-size: .9375rem;
+        line-height: 1.5;
+        border: 1px solid #8f959e;
+        border-radius: .6rem;
+        color: #495057;
+
+        &:focus {
+          color: #495057;
+          border-color: #5babf2;
+          outline: 0;
+          box-shadow: 0 0 0 .2rem rgb(15 108 191 / .75);
+        }
+    }
+
+    button{
+        padding: .375rem .75rem;
+        margin-left: 5px;
+        font-size: .9375rem;
+        line-height: 1.5;
+        border: 1px solid #8f959e;
+        border-radius: .6rem;
+        color: #495057;
+        background-color: transparent;
+
+        &:hover{
+          cursor: pointer;
+          color: #0f6cbf;
+          border-color: #5babf2;
+          outline: 0;
+          box-shadow: 0 0 0 .2rem rgb(15 108 191 / .75);
+        }
+    }
+}
+
+.list{
+    width: 100%;
+    height: fit-content;
+    margin-top: 15px;
+
+    .list-item{
+        width: 100%;
+        height: fit-content;
+        padding: .75rem .5rem;
+        text-decoration: none;
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid #dfdfdf;
+
+        &:hover{
+          cursor: pointer;
+        }
+
+        &:hover .exam-question-code{
+          text-decoration: underline;
+        }
+
+        .information{
+            width: 100%;
+            margin-right: 15px;
+
+            .exam-question-code{
+                font-size: 1.2rem;
+                font-weight: 400;
+                line-height: 1.5;
+                color: #0f6cbf;
+                margin-bottom: 5px;
+            }
+
+            .total-question{
+                font-size: 1rem;
+                font-weight: 400;
+                line-height: 1.5;
+                color: #1d2125;
+            }
+        }
+    }
+}
+
+.create-examquestion-form{
+    width: fit-content;
+    height: fit-content;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: .5rem;
+    box-shadow: 0 .5rem 1rem rgb(0 0 0 / .15);
+    display: flex;
+    flex-direction: column;
+  
+    .form-header{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+  
+      .title-add-teacher{
+        font-size: 1.875rem;
+        font-weight: 400;
+        color: #b85b05;
+      }
+  
+      i{
+        font-size: 1.5rem;
+        color: #b85b05;
+  
+        &:hover{
+          cursor: pointer;
+        }
+      }
+    }
+  
+    .examquestion-code{
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        margin-bottom: 15px;
+
+        label{
+            font-weight: 700;
+            font-size: larger;
+        }
+
+        input{
+            width: 50%;
+            height: calc(1.5em + 1rem + 2px);
+            padding: .5rem 1rem;
+            font-size: 1.171875rem;
+            line-height: 1.5;
+            border: 1px solid #8f959e;
+            border-radius: .6rem;
+            color: #495057;
+        
+            &:focus {
+              color: #495057;
+              background-color: #fff;
+              border-color: #5babf2;
+              outline: 0;
+              box-shadow: 0 0 0 .2rem rgb(15 108 191 / .75);
+            }
+        }
+
+    }
+
+    p{
+        font-weight: 700;
+        font-size: larger;
+    }
+
+    table{
+        margin: 15px 0;
+
+        th, td{
+            padding: 10px;
+
+            input{
+                width: 80px;
+                padding: 0 10px;
+                height: 35px;
+                font-size: 1rem;
+            }
+        }
+    }
+
+
+    .total-question{
+        display: flex;
+        gap: 50px;
+        align-items: center;
+        margin-bottom: 15px;
+
+        label{
+            font-weight: 700;
+            font-size: larger;
+        }
+    }
+  
+    .btn-add-teacher{
+      padding: .5rem 1rem;
+      margin-top: 14px;
+      font-size: 1.171875rem;
+      line-height: 1.5;
+      border: none;
+      border-radius: .6rem;
+      color: #fff;
+      background-color: #0f6cbf;
+  
+      &:hover{
+        cursor: pointer;
+        background-color: #0c589c;
+      }
+    }
+  }
